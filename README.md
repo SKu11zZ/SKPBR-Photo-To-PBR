@@ -84,7 +84,7 @@ The result is reported as-is. The held-out targets were not used to change weigh
 
 Apart from the four newly generated procedural public examples above, this repository does not include training or evaluation images, source PBR maps, material-library assets, training caches, optimizer states, local filesystem paths, per-example evaluation records, or nearest-neighbor catalogs. The checkpoint is a tensor-only state dictionary and should be loaded with `weights_only=True`.
 
-See [MODEL_CARD.md](MODEL_CARD.md), [DATA_POLICY.md](DATA_POLICY.md), and [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md) before publishing or redistributing the weights.
+See the [model card](docs/MODEL_CARD.md), [data policy](docs/DATA_POLICY.md), and [release checklist](docs/RELEASE_CHECKLIST.md) before publishing or redistributing the weights. The remaining technical and release documents are collected in the [documentation index](docs/README.md).
 
 ## License
 

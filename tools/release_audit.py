@@ -16,6 +16,7 @@ from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[1]
 CHECKPOINT = ROOT / "src" / "skpbr" / "weights" / "skpbr_v0_1_state_dict.pt"
+RELEASE_OUTPUT_DIR = ROOT / "docs" / "release"
 TEXT_SUFFIXES = {
     ".cff",
     ".gitignore",
@@ -198,11 +199,12 @@ def main() -> None:
     options = parser.parse_args()
     report, manifest = audit()
     if not options.check_only:
-        (ROOT / "release_manifest.json").write_text(
+        RELEASE_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+        (RELEASE_OUTPUT_DIR / "release_manifest.json").write_text(
             json.dumps(manifest, ensure_ascii=False, indent=2) + "\n",
             encoding="utf-8",
         )
-        (ROOT / "release_audit.json").write_text(
+        (RELEASE_OUTPUT_DIR / "release_audit.json").write_text(
             json.dumps(report, ensure_ascii=False, indent=2) + "\n",
             encoding="utf-8",
         )

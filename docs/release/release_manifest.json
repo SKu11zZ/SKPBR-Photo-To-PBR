@@ -1,6 +1,6 @@
 {
   "schema": "skpbr-public-release-manifest-v1",
-  "generated_utc": "2026-08-01T11:39:15.583124+00:00",
+  "generated_utc": "2026-08-01T11:48:31.913012+00:00",
   "files": [
     {
       "path": ".github/workflows/ci.yml",
@@ -13,24 +13,54 @@
       "sha256": "1694fe263835f00089711201a0b9bf5ef640cef58244caad067d030ad2949b70"
     },
     {
-      "path": "CHANGELOG.md",
-      "bytes": 519,
-      "sha256": "29bb36e29c85015fda7e9937c3439012ebc5b61d06ba1fbf5981d3629442c354"
-    },
-    {
       "path": "CITATION.cff",
       "bytes": 344,
       "sha256": "6a6270b909962ab0f896296837d41cd61fd4afcb1aebdb9b242b3ed35127f004"
     },
     {
-      "path": "CONTRIBUTING.md",
+      "path": "docs/CHANGELOG.md",
+      "bytes": 519,
+      "sha256": "29bb36e29c85015fda7e9937c3439012ebc5b61d06ba1fbf5981d3629442c354"
+    },
+    {
+      "path": "docs/CONTRIBUTING.md",
       "bytes": 453,
       "sha256": "75e73c7c9c42a7bbf9353764fec38642437157e9d6efc12881a2a0e186264978"
     },
     {
-      "path": "DATA_POLICY.md",
+      "path": "docs/DATA_POLICY.md",
       "bytes": 1672,
       "sha256": "99583beb5a2f09882317ecf9559508f3c4cbbc0a28ecb352c53081585a1961ab"
+    },
+    {
+      "path": "docs/MODEL_CARD.md",
+      "bytes": 3745,
+      "sha256": "79ad296c84c37cd758ba0c9f7a094c9ddb381ebd47bc5331242f9c51ebcf6d82"
+    },
+    {
+      "path": "docs/README.md",
+      "bytes": 572,
+      "sha256": "36c66dbfe708c9fea08266a75055ae7a83dc8cd39bc2c709c0427faf7b6c2f0d"
+    },
+    {
+      "path": "docs/RELEASE_CHECKLIST.md",
+      "bytes": 1107,
+      "sha256": "4825f23a12a4e04cf7564db32faa7afdf1810fea7b492c5de60f22de6f1376c5"
+    },
+    {
+      "path": "docs/REMOTE_SYNC_POLICY.md",
+      "bytes": 768,
+      "sha256": "000e377c238ce3715ce8f00e6c2d00f88c532502cc1a6a77a7b8981a35219fb3"
+    },
+    {
+      "path": "docs/SECURITY.md",
+      "bytes": 343,
+      "sha256": "baf43ccdfbff67907c9b7d15f08eb95380ad793c572a37115567115997ea5144"
+    },
+    {
+      "path": "docs/THIRD_PARTY.md",
+      "bytes": 392,
+      "sha256": "daadeae6eb43e46140c92119105fdb466c54cdc13facc193565d25ec1a6d9c5f"
     },
     {
       "path": "examples/public/contact_sheet.png",
@@ -233,44 +263,24 @@
       "sha256": "082e1c7cb79f0d60be5e24e31ea3e273f280cb12c1ec7ee688a839040a52222f"
     },
     {
-      "path": "MODEL_CARD.md",
-      "bytes": 3745,
-      "sha256": "79ad296c84c37cd758ba0c9f7a094c9ddb381ebd47bc5331242f9c51ebcf6d82"
-    },
-    {
       "path": "pyproject.toml",
       "bytes": 1138,
       "sha256": "57ae4050f84428e54d04c858d3e1a101108415edaa4e911318e5dd028e12f10a"
     },
     {
       "path": "README.md",
-      "bytes": 4903,
-      "sha256": "f84375091dad8a6241b119cf21902822fc839b5797306cf48861a1fea91111d9"
+      "bytes": 5019,
+      "sha256": "bc222f190c08454f407c9f8951944c6f8e8689c036ce4924b486e971e845d1a9"
     },
     {
       "path": "README_zh-CN.md",
-      "bytes": 3678,
-      "sha256": "653b668b36447f54b25b3e20a1d455e5b3a8e4f13a83c28e99d387098d085f0c"
-    },
-    {
-      "path": "RELEASE_CHECKLIST.md",
-      "bytes": 1107,
-      "sha256": "4825f23a12a4e04cf7564db32faa7afdf1810fea7b492c5de60f22de6f1376c5"
-    },
-    {
-      "path": "REMOTE_SYNC_POLICY.md",
-      "bytes": 768,
-      "sha256": "000e377c238ce3715ce8f00e6c2d00f88c532502cc1a6a77a7b8981a35219fb3"
+      "bytes": 3789,
+      "sha256": "6040fd6a269e0388d0c3df743af3131339181ac2731da2ff699e50016c0e5b25"
     },
     {
       "path": "requirements.txt",
       "bytes": 34,
       "sha256": "020525593785d1bc464f598ac8f619087ce8b45d748ab51b94cd1c91c8485092"
-    },
-    {
-      "path": "SECURITY.md",
-      "bytes": 343,
-      "sha256": "baf43ccdfbff67907c9b7d15f08eb95380ad793c572a37115567115997ea5144"
     },
     {
       "path": "src/skpbr/__init__.py",
@@ -308,14 +318,9 @@
       "sha256": "a70af27c777d3233e944bdf8e8c1805b18394a58804c54a5d2ebc64af88a434d"
     },
     {
-      "path": "THIRD_PARTY.md",
-      "bytes": 392,
-      "sha256": "daadeae6eb43e46140c92119105fdb466c54cdc13facc193565d25ec1a6d9c5f"
-    },
-    {
       "path": "tools/release_audit.py",
-      "bytes": 7427,
-      "sha256": "126857fe09b5cfa24b5fee2e73f90ab21827de7c543e0a1bb1a89f1ade5854b4"
+      "bytes": 7564,
+      "sha256": "d4612dd35df628ef80e1769eda36cb5074483cbaec584e484209cfde79b9ce6b"
     }
   ]
 }
