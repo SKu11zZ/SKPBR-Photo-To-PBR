@@ -1,0 +1,115 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="360" viewBox="0 0 1280 360" role="img" aria-labelledby="title desc">
+  <title id="title">SKPBR — Photo and prompt to PBR materials</title>
+  <desc id="desc">A dark asymmetric material-lab banner showing a scanned texture tile, six PBR channels, model status, and project name.</desc>
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#070b10"/>
+      <stop offset="0.58" stop-color="#0c131c"/>
+      <stop offset="1" stop-color="#111923"/>
+    </linearGradient>
+    <linearGradient id="material" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#26394a"/>
+      <stop offset="0.30" stop-color="#182732"/>
+      <stop offset="0.64" stop-color="#405260"/>
+      <stop offset="1" stop-color="#17212a"/>
+    </linearGradient>
+    <linearGradient id="scan" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#59ddff" stop-opacity="0"/>
+      <stop offset="0.40" stop-color="#59ddff" stop-opacity="0.95"/>
+      <stop offset="0.62" stop-color="#91ebff" stop-opacity="0.95"/>
+      <stop offset="1" stop-color="#59ddff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="normal" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#765cff"/>
+      <stop offset="0.48" stop-color="#4b8bff"/>
+      <stop offset="1" stop-color="#ec72d7"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#53d9ff" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#53d9ff" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M32 0H0V32" fill="none" stroke="#94a6b8" stroke-width="1" stroke-opacity="0.08"/>
+    </pattern>
+    <pattern id="grain" width="44" height="44" patternUnits="userSpaceOnUse" patternTransform="rotate(-18)">
+      <path d="M-10 7H54M-10 25H54M-10 39H54" stroke="#b8cad6" stroke-width="2" stroke-opacity="0.10"/>
+      <circle cx="9" cy="16" r="3" fill="#e3eef4" fill-opacity="0.18"/>
+      <circle cx="35" cy="33" r="2" fill="#03070b" fill-opacity="0.50"/>
+    </pattern>
+    <filter id="softGlow" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="7"/>
+    </filter>
+    <clipPath id="sampleClip">
+      <rect x="72" y="83" width="246" height="186" rx="14"/>
+    </clipPath>
+  </defs>
+
+  <rect width="1280" height="360" rx="22" fill="url(#background)"/>
+  <rect width="1280" height="360" rx="22" fill="url(#grid)"/>
+  <circle cx="1060" cy="58" r="250" fill="url(#glow)"/>
+  <path d="M1010 -30L1280 160V230L920 -30Z" fill="#5ddfff" opacity="0.025"/>
+
+  <g aria-label="Reference material patch">
+    <rect x="42" y="32" width="306" height="296" rx="22" fill="#0a1118" stroke="#273440"/>
+    <text x="72" y="64" fill="#7f93a4" font-family="Segoe UI, Arial, sans-serif" font-size="11" font-weight="700" letter-spacing="2.2">REFERENCE PATCH / 01</text>
+    <rect x="72" y="83" width="246" height="186" rx="14" fill="url(#material)" stroke="#40505d"/>
+    <g clip-path="url(#sampleClip)">
+      <rect x="72" y="83" width="246" height="186" fill="url(#grain)"/>
+      <path d="M58 245C117 186 130 218 179 161C212 123 250 167 337 97" fill="none" stroke="#b8c8d2" stroke-width="9" stroke-linecap="round" opacity="0.08"/>
+      <path d="M50 240C116 180 134 210 180 157C218 114 258 159 344 92" fill="none" stroke="#e7f2f7" stroke-width="2" stroke-linecap="round" opacity="0.26"/>
+      <path d="M64 196H330" stroke="url(#scan)" stroke-width="2"/>
+      <path d="M197 74V280" stroke="#61ddff" stroke-width="1" stroke-opacity="0.22" stroke-dasharray="4 7"/>
+      <circle cx="197" cy="196" r="8" fill="none" stroke="#74e4ff" stroke-opacity="0.65"/>
+      <circle cx="197" cy="196" r="22" fill="none" stroke="#74e4ff" stroke-opacity="0.17"/>
+    </g>
+    <path d="M72 101V83H90M300 83H318V101M72 251V269H90M300 269H318V251" fill="none" stroke="#88e7ff" stroke-width="2"/>
+    <g font-family="Segoe UI, Arial, sans-serif" font-size="9" font-weight="700" letter-spacing="1.2">
+      <rect x="72" y="290" width="36" height="5" rx="2" fill="#d4b58b"/>
+      <rect x="114" y="290" width="36" height="5" rx="2" fill="#c8d0d7"/>
+      <rect x="156" y="290" width="36" height="5" rx="2" fill="#65717b"/>
+      <rect x="198" y="290" width="36" height="5" rx="2" fill="url(#normal)"/>
+      <rect x="240" y="290" width="36" height="5" rx="2" fill="#ffbd61"/>
+      <rect x="282" y="290" width="36" height="5" rx="2" fill="#303942"/>
+      <text x="72" y="314" fill="#7f93a4">B</text>
+      <text x="114" y="314" fill="#7f93a4">R</text>
+      <text x="156" y="314" fill="#7f93a4">M</text>
+      <text x="198" y="314" fill="#7f93a4">N</text>
+      <text x="240" y="314" fill="#7f93a4">H</text>
+      <text x="282" y="314" fill="#7f93a4">AO</text>
+    </g>
+  </g>
+
+  <g font-family="Segoe UI, Arial, sans-serif">
+    <text x="395" y="58" fill="#6bdfff" font-size="12" font-weight="700" letter-spacing="3">PHOTO / PROMPT → SIX-MAP MATERIAL</text>
+    <text x="1198" y="58" text-anchor="end" fill="#6f8292" font-size="11" font-weight="600" letter-spacing="2">BUILD D41</text>
+    <text x="390" y="139" fill="#f5f8fa" font-size="78" font-weight="750" letter-spacing="5">SKPBR</text>
+    <rect x="394" y="160" width="4" height="61" rx="2" fill="#5cdfff"/>
+    <text x="416" y="184" fill="#eef4f7" font-size="23" font-weight="600">单图 + 文字，重建可编辑的 PBR 材质</text>
+    <text x="416" y="213" fill="#9caebb" font-size="16" font-weight="450" letter-spacing="0.3">Planar image + prompt reconstruction. Text-only generation stays experimental.</text>
+    <line x1="390" y1="245" x2="1206" y2="245" stroke="#2c3944"/>
+
+    <g font-size="10" font-weight="700" letter-spacing="1.35">
+      <text x="390" y="271" fill="#6f8292">RECONSTRUCTION</text>
+      <text x="390" y="298" fill="#eff7fa" font-size="14" letter-spacing="0.8">IMAGE + TEXT</text>
+      <text x="390" y="322" fill="#5cddff">MVP</text>
+
+      <text x="570" y="271" fill="#6f8292">GENERATION</text>
+      <text x="570" y="298" fill="#eff7fa" font-size="14" letter-spacing="0.8">TEXT + SEED</text>
+      <text x="570" y="322" fill="#ffb956">EXPERIMENTAL</text>
+
+      <text x="770" y="271" fill="#6f8292">MODEL</text>
+      <text x="770" y="298" fill="#eff7fa" font-size="14" letter-spacing="0.8">4,042,230</text>
+      <text x="770" y="322" fill="#8ea2b1">PARAMETERS</text>
+
+      <text x="945" y="271" fill="#6f8292">OUTPUT</text>
+      <text x="945" y="298" fill="#eff7fa" font-size="14" letter-spacing="0.8">6 MAPS · 512 PX</text>
+      <text x="945" y="322" fill="#8ea2b1">OPENGL +Y</text>
+
+      <text x="1135" y="271" fill="#6f8292">LICENSE</text>
+      <text x="1135" y="298" fill="#eff7fa" font-size="14" letter-spacing="0.8">APACHE</text>
+      <text x="1135" y="322" fill="#8ea2b1">2.0</text>
+    </g>
+  </g>
+
+  <rect x="0.75" y="0.75" width="1278.5" height="358.5" rx="21.25" fill="none" stroke="#26323c" stroke-width="1.5"/>
+</svg>

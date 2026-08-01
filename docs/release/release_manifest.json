@@ -1,6 +1,6 @@
 {
   "schema": "skpbr-public-release-manifest-v2",
-  "generated_utc": "2026-08-01T16:07:12.172020+00:00",
+  "generated_utc": "2026-08-01T16:15:31.938173+00:00",
   "files": [
     {
       "path": ".github/workflows/ci.yml",
@@ -46,6 +46,16 @@
       "path": "CITATION.cff",
       "bytes": 326,
       "sha256": "dc2accb4af866b3e351b0550e8516fa05ff3e2b50c4bb861261b504fc51231dd"
+    },
+    {
+      "path": "docs/assets/skpbr_hero.svg",
+      "bytes": 7053,
+      "sha256": "020ecc72101912d2d7edbd72fb49a503a0393d8bef720fd7b848f8806f4d8fcb"
+    },
+    {
+      "path": "docs/assets/skpbr_hero_manifest.json",
+      "bytes": 884,
+      "sha256": "20e6ba8df1a722258d3b646be6b293d374a12d08c0e33333dbfb9eec1f0e33ef"
     },
     {
       "path": "docs/CHANGELOG.md",
@@ -1034,8 +1044,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 8930,
-      "sha256": "626df6a6863e63304e45a467f7b6704fddc4d1c726ad8a4b90e4b6389812bf60"
+      "bytes": 9524,
+      "sha256": "71fe3505eedc35f0f160daa9227c04e0f41a404c8bcd6eddf3b06929466d84eb"
     },
     {
       "path": "requirements.txt",

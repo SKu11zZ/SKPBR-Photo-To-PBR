@@ -1,6 +1,26 @@
-# SKPBR
+<div align="center">
+  <img src="docs/assets/skpbr_hero.svg" width="100%" alt="SKPBR — planar image and Prompt to six PBR maps">
+</div>
 
-[English](#english) · [简体中文](#简体中文)
+<p align="center">
+  <a href="#english"><strong>English</strong></a>
+  &nbsp;·&nbsp;
+  <a href="#简体中文"><strong>简体中文</strong></a>
+  &nbsp;·&nbsp;
+  <a href="docs/evaluation/SKPBR_D38_D41_Technical_Report.html">D38–D41 Report</a>
+  &nbsp;·&nbsp;
+  <a href="LICENSE">Apache-2.0</a>
+</p>
+
+<p align="center">
+  <code>IMAGE + TEXT · MVP</code>
+  &nbsp;&nbsp;
+  <code>TEXT + SEED · EXPERIMENTAL</code>
+  &nbsp;&nbsp;
+  <code>4,042,230 PARAMS</code>
+  &nbsp;&nbsp;
+  <code>512 PX · 6 MAPS</code>
+</p>
 
 ## English
 
