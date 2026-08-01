@@ -5,7 +5,7 @@
 - Replaced the public BaseColor-only head with the 4,042,230-parameter D41 planar dual-mode checkpoint.
 - Added aligned image + bilingual Prompt reconstruction that writes six 512px PBR maps.
 - Added deterministic Prompt + seed generation and clearly marked it experimental after the 6/12 Fresh-12B failure.
-- Published frozen D10 metrics, Fresh-12B and same-material-color sheets, and the D38-D41 technical report.
+- Published frozen D10 metrics plus compact Fresh-12B and same-material-color evaluation sheets.
 - Added circular padding, full-resolution image transport, tile/seam support, and Prompt color/texture adapters.
 - Updated tests for bilingual parsing, checkpoint integrity, both forward modes, deterministic seeds, and six-map output.
 - Changed the current repository license from MIT to Apache License 2.0 and added NOTICE.

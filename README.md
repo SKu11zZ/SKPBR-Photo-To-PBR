@@ -7,7 +7,7 @@
   &nbsp;·&nbsp;
   <a href="#简体中文"><strong>简体中文</strong></a>
   &nbsp;·&nbsp;
-  <a href="docs/evaluation/SKPBR_D38_D41_Technical_Report.html">D38–D41 Report</a>
+  <a href="docs/MODEL_CARD.md">Model Card</a>
   &nbsp;·&nbsp;
   <a href="LICENSE">Apache-2.0</a>
 </p>
@@ -63,7 +63,7 @@ The image-plus-text path is already useful for metals, coatings, concrete, ceram
 | Same material, four colors | 3 / 4 | white failed |
 | Peak training VRAM estimate | 5.07 GiB | below the 8 GiB cap |
 
-The D10 set contains 81 held-out examples. Fresh-12B is a second one-shot suite created after the Prompt adapter was frozen; it was not used for another tuning round. The complete methodology and per-material table are in the [D38-D41 technical report](docs/evaluation/SKPBR_D38_D41_Technical_Report.html).
+The D10 set contains 81 held-out examples. Fresh-12B is a second one-shot suite created after the Prompt adapter was frozen; it was not used for another tuning round. Release metrics and known limitations are summarized in the [model card](docs/MODEL_CARD.md).
 
 ### Install
 
@@ -115,7 +115,7 @@ Not established yet:
 
 ### What is published
 
-The repository contains inference code, the frozen v0.2 checkpoint, tests, the twelve-material blind sheet, aggregate evaluation evidence, and the previous v0.1 historical audit. It does **not** contain commercial material assets, source PBR libraries, training images, private caches, optimizer states, sample identities, or nearest-neighbor catalogs.
+The repository contains inference code, the frozen v0.2 checkpoint, tests, and two compact D41 evaluation sheets. Detailed internal reports, release logs, source PBR libraries, training images, private caches, optimizer states, sample identities, and nearest-neighbor catalogs are intentionally kept out of the current GitHub tree.
 
 ### License
 
@@ -155,7 +155,7 @@ SKPBR 是我把材质参考图变成 Blender 或游戏引擎里能直接用的 P
 | 同材质四色 | 3 / 4 | 白色失败 |
 | 训练峰值显存估算 | 5.07 GiB | 低于 8 GiB 限制 |
 
-D10 是 81 个冻结测试样本。Fresh-12B 是 Prompt 适配器冻结后才生成的第二套一次性测试，失败后没有继续拿它调参。完整方法和逐材质数据见 [D38-D41 技术报告](docs/evaluation/SKPBR_D38_D41_Technical_Report.html)。
+D10 是 81 个冻结测试样本。Fresh-12B 是 Prompt 适配器冻结后才生成的第二套一次性测试，失败后没有继续拿它调参。发布指标和已知限制集中写在[模型卡](docs/MODEL_CARD.md)里。
 
 ### 安装
 
@@ -207,7 +207,7 @@ skpbr \
 
 ### 仓库里有什么
 
-仓库包含推理代码、冻结的 v0.2 权重、测试、12 材质盲测图、汇总评估数据，以及 v0.1 的历史审计。仓库不包含商业材质资产、源 PBR 库、训练图片、私有缓存、优化器状态、样本身份或近邻检索目录。
+仓库只保留推理代码、冻结的 v0.2 权重、测试和两张精简的 D41 评估图。内部训练报告、发布日志、源 PBR 库、训练图片、私有缓存、优化器状态、样本身份和近邻检索目录都不会长期摆在当前 GitHub 目录里。
 
 ### 许可证
 

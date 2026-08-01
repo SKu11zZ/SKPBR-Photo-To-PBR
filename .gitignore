@@ -13,3 +13,18 @@ outputs/
 *.writing
 .DS_Store
 Thumbs.db
+
+# Local research archive; intentionally omitted from the public GitHub tree.
+/docs/evaluation/
+/docs/release/
+/docs/COVERAGE_AUDIT_12.md
+/docs/COVERAGE_AUDIT_12_zh-CN.md
+/docs/RELEASE_CHECKLIST.md
+/docs/REMOTE_SYNC_POLICY.md
+/docs/README.md
+/docs/assets/skpbr_hero_manifest.json
+/examples/public/
+/examples/coverage-12/
+/examples/README.md
+/examples/README_zh-CN.md
+/examples/plane-d41/README.md

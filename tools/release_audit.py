@@ -9,6 +9,7 @@ import hashlib
 import json
 from pathlib import Path
 import re
+import subprocess
 
 import torch
 from PIL import Image
@@ -16,7 +17,6 @@ from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[1]
 CHECKPOINT = ROOT / "src" / "skpbr" / "weights" / "skpbr_v0_2_dualmode.pt"
-RELEASE_OUTPUT_DIR = ROOT / "docs" / "release"
 TEXT_SUFFIXES = {
     ".cff",
     ".gitignore",
@@ -50,93 +50,11 @@ INTERNAL_TOKENS = (
     "basecolor_" + "override",
     "training_" + "target",
 )
-EXCLUDED_OUTPUTS = {"release_audit.json", "release_manifest.json"}
-PUBLIC_EXAMPLE_PROMPTS = {
-    "dark-rubber": "dark rubber, rough matte finish",
-    "rough-steel": "rough coarse steel",
-    "white-marble": "white marble with subtle gray veins, polished finish",
-    "cyan-automotive-clearcoat": "cyan blue automotive clearcoat, glossy metallic finish",
-}
-PUBLIC_EXAMPLE_MAPS = ("basecolor", "roughness", "metallic", "normal", "height", "ao")
-COVERAGE_EXAMPLES = {
-    "brushed-aluminum": (
-        "拉丝铝 / Brushed Aluminum",
-        "brushed aluminum with fine directional scratches, satin metallic finish",
-    ),
-    "oxidized-copper": (
-        "氧化铜 / Oxidized Copper",
-        "oxidized copper with irregular green patina and exposed warm copper",
-    ),
-    "red-powder-coated-steel": (
-        "红色粉末涂层钢 / Red Powder-Coated Steel",
-        "deep red powder-coated steel with fine orange-peel texture, semi-matte finish",
-    ),
-    "black-abs-plastic": (
-        "黑色 ABS 塑料 / Black ABS Plastic",
-        "black ABS plastic with subtle molded grain, matte finish",
-    ),
-    "speckled-granite": (
-        "斑点花岗岩 / Speckled Granite",
-        "gray speckled granite with black and pale mineral grains, honed finish",
-    ),
-    "weathered-concrete": (
-        "风化混凝土 / Weathered Concrete",
-        "weathered gray concrete with pores, aggregate marks and a rough dry surface",
-    ),
-    "red-brick": (
-        "红砖 / Red Brick",
-        "fired red brick with warm color variation, fine pits and a dry rough finish",
-    ),
-    "blue-glazed-ceramic": (
-        "蓝色釉面陶瓷 / Blue Glazed Ceramic",
-        "cobalt blue glazed ceramic with subtle cloudy variation and glossy finish",
-    ),
-    "carbon-fiber": (
-        "碳纤维复合材料 / Carbon Fiber Composite",
-        "dark carbon fiber composite with a fine two-by-two twill weave and satin clear coat",
-    ),
-    "natural-cork": (
-        "天然软木 / Natural Cork",
-        "natural tan cork with irregular dark pores and a dry matte surface",
-    ),
-    "brown-grain-leather": (
-        "棕色粒面皮革 / Brown Grain Leather",
-        "medium brown grain leather with natural creases and a soft semi-matte finish",
-    ),
-    "blue-denim": (
-        "蓝色牛仔布 / Blue Denim Fabric",
-        "indigo blue denim fabric with visible diagonal twill weave and a dry soft finish",
-    ),
-}
-PUBLIC_SHEET_DIMENSIONS = {
-    "examples/public/contact_sheet.png": (1900, 1725),
-    "examples/coverage-12/contact_sheet_long.png": (2160, 5040),
-    "examples/coverage-12/contact_sheet_part_01.png": (2160, 1770),
-    "examples/coverage-12/contact_sheet_part_02.png": (2160, 1620),
-    "examples/coverage-12/contact_sheet_part_03.png": (2160, 1650),
+PUBLIC_IMAGE_DIMENSIONS = {
     "examples/plane-d41/fresh12b_contact_sheet.jpg": (1680, 4190),
     "examples/plane-d41/same_material_color_b_contact_sheet.jpg": (1680, 1470),
 }
-ALLOWED_PUBLIC_IMAGES = set(PUBLIC_SHEET_DIMENSIONS)
-for _slug in PUBLIC_EXAMPLE_PROMPTS:
-    ALLOWED_PUBLIC_IMAGES.update(
-        {
-            f"examples/public/{_slug}/input.png",
-            f"examples/public/{_slug}/output_render.png",
-            *(f"examples/public/{_slug}/maps/{name}.png" for name in PUBLIC_EXAMPLE_MAPS),
-        }
-    )
-for _slug in COVERAGE_EXAMPLES:
-    ALLOWED_PUBLIC_IMAGES.update(
-        {
-            f"examples/coverage-12/materials/{_slug}/input.png",
-            f"examples/coverage-12/materials/{_slug}/output_render.png",
-            *(
-                f"examples/coverage-12/materials/{_slug}/maps/{name}.png"
-                for name in PUBLIC_EXAMPLE_MAPS
-            ),
-        }
-    )
+ALLOWED_PUBLIC_IMAGES = set(PUBLIC_IMAGE_DIMENSIONS)
 
 
 def sha256(path: Path) -> str:
@@ -148,13 +66,16 @@ def sha256(path: Path) -> str:
 
 
 def repository_files() -> list[Path]:
+    result = subprocess.run(
+        ["git", "ls-files", "-z"],
+        cwd=ROOT,
+        check=True,
+        capture_output=True,
+    )
     return sorted(
-        path
-        for path in ROOT.rglob("*")
-        if path.is_file()
-        and ".git" not in path.parts
-        and "__pycache__" not in path.parts
-        and path.name not in EXCLUDED_OUTPUTS
+        ROOT / relative.decode("utf-8")
+        for relative in result.stdout.split(b"\0")
+        if relative and (ROOT / relative.decode("utf-8")).is_file()
     )
 
 
@@ -173,7 +94,7 @@ def audit() -> tuple[dict[str, object], dict[str, object]]:
         ):
             forbidden_assets.append(relative)
         if relative in ALLOWED_PUBLIC_IMAGES:
-            expected_dimensions = PUBLIC_SHEET_DIMENSIONS.get(relative, (1024, 1024))
+            expected_dimensions = PUBLIC_IMAGE_DIMENSIONS[relative]
             with Image.open(path) as image:
                 if image.size != expected_dimensions:
                     invalid_example_dimensions.append(
@@ -193,39 +114,6 @@ def audit() -> tuple[dict[str, object], dict[str, object]]:
     missing_public_example_files = sorted(
         ALLOWED_PUBLIC_IMAGES.difference(relative_files)
     )
-    prompt_mismatches = []
-    for slug, expected in PUBLIC_EXAMPLE_PROMPTS.items():
-        relative = f"examples/public/{slug}/prompt.txt"
-        path = relative_files.get(relative)
-        actual = path.read_text(encoding="utf-8").strip() if path else None
-        if actual != expected:
-            prompt_mismatches.append(
-                {"file": relative, "expected": expected, "actual": actual}
-            )
-    for slug, (expected_name, expected_prompt) in COVERAGE_EXAMPLES.items():
-        root = f"examples/coverage-12/materials/{slug}"
-        checks = {
-            f"{root}/material_name.txt": expected_name,
-            f"{root}/prompt_en.txt": expected_prompt,
-        }
-        for relative, expected in checks.items():
-            path = relative_files.get(relative)
-            actual = path.read_text(encoding="utf-8").strip() if path else None
-            if actual != expected:
-                prompt_mismatches.append(
-                    {"file": relative, "expected": expected, "actual": actual}
-                )
-        relative = f"{root}/prompt_zh-CN.txt"
-        path = relative_files.get(relative)
-        actual = path.read_text(encoding="utf-8").strip() if path else None
-        if not actual or not actual.endswith("中文译文仅用于展示，未输入模型。"):
-            prompt_mismatches.append(
-                {
-                    "file": relative,
-                    "expected": "Chinese display translation ending with the non-input disclosure",
-                    "actual": actual,
-                }
-            )
     if not CHECKPOINT.is_file():
         raise FileNotFoundError(CHECKPOINT)
     payload = torch.load(CHECKPOINT, map_location="cpu", weights_only=True)
@@ -249,7 +137,6 @@ def audit() -> tuple[dict[str, object], dict[str, object]]:
         and not forbidden_assets
         and not missing_public_example_files
         and not invalid_example_dimensions
-        and not prompt_mismatches
         and checkpoint_tensor_only
         and parameter_count == 4_042_230
         and not checkpoint_private_hits
@@ -276,7 +163,6 @@ def audit() -> tuple[dict[str, object], dict[str, object]]:
             "forbidden_image_or_scene_assets": forbidden_assets,
             "missing_public_example_files": missing_public_example_files,
             "invalid_public_example_dimensions": invalid_example_dimensions,
-            "public_example_prompt_mismatches": prompt_mismatches,
             "approved_public_example_image_count": len(ALLOWED_PUBLIC_IMAGES),
             "checkpoint_tensor_only": checkpoint_tensor_only,
             "checkpoint_state_tensors": len(state) if isinstance(state, dict) else 0,
@@ -297,16 +183,20 @@ def audit() -> tuple[dict[str, object], dict[str, object]]:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--check-only", action="store_true")
+    parser.add_argument(
+        "--output-dir",
+        type=Path,
+        help="Optionally write the manifest and audit JSON outside the public tree.",
+    )
     options = parser.parse_args()
     report, manifest = audit()
-    if not options.check_only:
-        RELEASE_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-        (RELEASE_OUTPUT_DIR / "release_manifest.json").write_text(
+    if options.output_dir:
+        options.output_dir.mkdir(parents=True, exist_ok=True)
+        (options.output_dir / "release_manifest.json").write_text(
             json.dumps(manifest, ensure_ascii=False, indent=2) + "\n",
             encoding="utf-8",
         )
-        (RELEASE_OUTPUT_DIR / "release_audit.json").write_text(
+        (options.output_dir / "release_audit.json").write_text(
             json.dumps(report, ensure_ascii=False, indent=2) + "\n",
             encoding="utf-8",
         )
