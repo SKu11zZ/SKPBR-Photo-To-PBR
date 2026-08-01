@@ -1,0 +1,321 @@
+{
+  "schema": "skpbr-public-release-manifest-v1",
+  "generated_utc": "2026-08-01T11:39:15.583124+00:00",
+  "files": [
+    {
+      "path": ".github/workflows/ci.yml",
+      "bytes": 408,
+      "sha256": "90c11aeb7588b0a6f815bb893036c8ee9486e0ddeecce8b2da5c28273989a303"
+    },
+    {
+      "path": ".gitignore",
+      "bytes": 147,
+      "sha256": "1694fe263835f00089711201a0b9bf5ef640cef58244caad067d030ad2949b70"
+    },
+    {
+      "path": "CHANGELOG.md",
+      "bytes": 519,
+      "sha256": "29bb36e29c85015fda7e9937c3439012ebc5b61d06ba1fbf5981d3629442c354"
+    },
+    {
+      "path": "CITATION.cff",
+      "bytes": 344,
+      "sha256": "6a6270b909962ab0f896296837d41cd61fd4afcb1aebdb9b242b3ed35127f004"
+    },
+    {
+      "path": "CONTRIBUTING.md",
+      "bytes": 453,
+      "sha256": "75e73c7c9c42a7bbf9353764fec38642437157e9d6efc12881a2a0e186264978"
+    },
+    {
+      "path": "DATA_POLICY.md",
+      "bytes": 1672,
+      "sha256": "99583beb5a2f09882317ecf9559508f3c4cbbc0a28ecb352c53081585a1961ab"
+    },
+    {
+      "path": "examples/public/contact_sheet.png",
+      "bytes": 951052,
+      "sha256": "6f3e1cd66cdcfaadde26f9a60aeafe44bdee057eca9d292dae2e8083064b03d7"
+    },
+    {
+      "path": "examples/public/cyan-automotive-clearcoat/input.png",
+      "bytes": 981623,
+      "sha256": "c0125e1cdb21bd4912937c4bada1ce0e6111b7a8290b0994aa03b4e735eabc2c"
+    },
+    {
+      "path": "examples/public/cyan-automotive-clearcoat/maps/ao.png",
+      "bytes": 63191,
+      "sha256": "b7ced7b64ac6aecfcf714497ed1ee45d60d0d55b5ce9d4a9e47c7e25dfcb0146"
+    },
+    {
+      "path": "examples/public/cyan-automotive-clearcoat/maps/basecolor.png",
+      "bytes": 673701,
+      "sha256": "7b356a45dab7cc236845141000f713c19b55ef99bf699040fa0f7559cd4ebbc4"
+    },
+    {
+      "path": "examples/public/cyan-automotive-clearcoat/maps/height.png",
+      "bytes": 1207649,
+      "sha256": "db3f90147ca90c3f627e3ac6ed0992b64f5c788afc3d52686e23b953434f2204"
+    },
+    {
+      "path": "examples/public/cyan-automotive-clearcoat/maps/metallic.png",
+      "bytes": 48002,
+      "sha256": "b7622d70e976aad1402e6b4d1e293d327658f97452849407b470504e0a0a96a6"
+    },
+    {
+      "path": "examples/public/cyan-automotive-clearcoat/maps/normal.png",
+      "bytes": 295530,
+      "sha256": "eb00a86c1e96b431abee8659d3d43c3020f7812f6d674e9d7422167eeb758500"
+    },
+    {
+      "path": "examples/public/cyan-automotive-clearcoat/maps/roughness.png",
+      "bytes": 146401,
+      "sha256": "ea566ef6cbe904679640880c02f96f91a3508ec6a8251a9782e1958f10faebd0"
+    },
+    {
+      "path": "examples/public/cyan-automotive-clearcoat/output_render.png",
+      "bytes": 1031850,
+      "sha256": "5518dc125a185f047270553f68ffcfafd4ff89910e76d2981b4833b27be3e886"
+    },
+    {
+      "path": "examples/public/cyan-automotive-clearcoat/prompt.txt",
+      "bytes": 55,
+      "sha256": "3a6a11327ec8118735165cad82965d1902e379288dd1adc13cda13d5faa70c57"
+    },
+    {
+      "path": "examples/public/dark-rubber/input.png",
+      "bytes": 909606,
+      "sha256": "84e9416622fc80c8520056880e1e88dcb2f7a43d5057474ee4268ac648bbe19b"
+    },
+    {
+      "path": "examples/public/dark-rubber/maps/ao.png",
+      "bytes": 130500,
+      "sha256": "43ff1bca1295d64fa06da994a5559b356f365dd05f90385fa5253a2d1887cdd9"
+    },
+    {
+      "path": "examples/public/dark-rubber/maps/basecolor.png",
+      "bytes": 675425,
+      "sha256": "8264e6de78c5ed7fc011d2729a0882c83ac85e851880c14e97d198a2bbd9425d"
+    },
+    {
+      "path": "examples/public/dark-rubber/maps/height.png",
+      "bytes": 1265039,
+      "sha256": "e55a6773588b674fdc405ca247a99ba3d395bfd080e857c1692c2b73cac8418c"
+    },
+    {
+      "path": "examples/public/dark-rubber/maps/metallic.png",
+      "bytes": 11675,
+      "sha256": "4a7fbe2a593aac50ee9c7d00a25e645c4bd1a0e6fa5ebf9d8996d3b98eccb706"
+    },
+    {
+      "path": "examples/public/dark-rubber/maps/normal.png",
+      "bytes": 383043,
+      "sha256": "af2a70fb4a40807821446d81957c1f6dd054f0dd3248d96c674054b5f8ea6be7"
+    },
+    {
+      "path": "examples/public/dark-rubber/maps/roughness.png",
+      "bytes": 188268,
+      "sha256": "b0e53923b08e8f10d7f5b651c77e87fe73193ada2cd690946d1f813f65b75b8e"
+    },
+    {
+      "path": "examples/public/dark-rubber/output_render.png",
+      "bytes": 1004996,
+      "sha256": "9415f40be5084958c3ad066a2f6fc20d014ec552b24e69133af7b0d89af90b1c"
+    },
+    {
+      "path": "examples/public/dark-rubber/prompt.txt",
+      "bytes": 32,
+      "sha256": "1649ca9203ffd47d2e41e893424543c61bf79972a0dd52875889a5c2385ec774"
+    },
+    {
+      "path": "examples/public/rough-steel/input.png",
+      "bytes": 1040726,
+      "sha256": "3d396a47cbc208ef2fa3e9f858b0b422a7c62e04afd232b702ec5e5e12fd9888"
+    },
+    {
+      "path": "examples/public/rough-steel/maps/ao.png",
+      "bytes": 29434,
+      "sha256": "074dbda1c25601ae9eaa74bf7a446b142fa53e23a31d843a5ebc1e234ed7f329"
+    },
+    {
+      "path": "examples/public/rough-steel/maps/basecolor.png",
+      "bytes": 625698,
+      "sha256": "b5c17b1233159562151a4d63a3fd10fa2c8ccd7cfdc4784f211f49523af871f3"
+    },
+    {
+      "path": "examples/public/rough-steel/maps/height.png",
+      "bytes": 1176811,
+      "sha256": "5080184b40b14b5f610166a7729e2593870fea7310a0bda7af566904083e927e"
+    },
+    {
+      "path": "examples/public/rough-steel/maps/metallic.png",
+      "bytes": 41604,
+      "sha256": "16c1a576802acdf69bc7c6825fe1cb0f8636b6e34594c750f1b76d81d98fd0c6"
+    },
+    {
+      "path": "examples/public/rough-steel/maps/normal.png",
+      "bytes": 237765,
+      "sha256": "44de12332c2e10afc24cd104bdd7769a9fea6328a419a9a1bfab4ef1a5adf764"
+    },
+    {
+      "path": "examples/public/rough-steel/maps/roughness.png",
+      "bytes": 140428,
+      "sha256": "61f244f2dd7c8e1358e879330333b2be33ca01d2d861149e232bf23b5ce4236b"
+    },
+    {
+      "path": "examples/public/rough-steel/output_render.png",
+      "bytes": 1070976,
+      "sha256": "11e728af4e3552cfc967c1f083e122dfd011c75d91d792b2ddeb05a7d14dcb2e"
+    },
+    {
+      "path": "examples/public/rough-steel/prompt.txt",
+      "bytes": 19,
+      "sha256": "5a4b4bf79474c2e312f16c5505acae8ff217197d43982117bd03117b24dac685"
+    },
+    {
+      "path": "examples/public/white-marble/input.png",
+      "bytes": 909277,
+      "sha256": "905161b01f267d462a2d7044147a8e9a01d9be1f56f4a277deb85ec3d419d944"
+    },
+    {
+      "path": "examples/public/white-marble/maps/ao.png",
+      "bytes": 45804,
+      "sha256": "92ec1bedaa98bcdbd442502ca7c1e9713aa275a5b7fbe67cae3bdd11f54513ea"
+    },
+    {
+      "path": "examples/public/white-marble/maps/basecolor.png",
+      "bytes": 652777,
+      "sha256": "322087e353853f75ee40f5a318329f0af001b00fa0c110b8095859b4f0ccc43b"
+    },
+    {
+      "path": "examples/public/white-marble/maps/height.png",
+      "bytes": 991456,
+      "sha256": "dd85b2bc9e7cd124c5c960492ac4f1ac28bac53336ef9a8d792d9e4e2d6d2ee7"
+    },
+    {
+      "path": "examples/public/white-marble/maps/metallic.png",
+      "bytes": 5372,
+      "sha256": "fbac76a22a503493c01bf3c282647ec4a0f25c6165073c017bde93851ea087c2"
+    },
+    {
+      "path": "examples/public/white-marble/maps/normal.png",
+      "bytes": 214056,
+      "sha256": "518552521ed9fe4bf93c10939e5d30ca8a351a4af1cf79c9046edae8029d0e68"
+    },
+    {
+      "path": "examples/public/white-marble/maps/roughness.png",
+      "bytes": 122496,
+      "sha256": "e6ed761510770dcadf07bf3c6ad66f6d3b83f695c4256af9387966dc1aaa7510"
+    },
+    {
+      "path": "examples/public/white-marble/output_render.png",
+      "bytes": 969168,
+      "sha256": "ee54c84ba5b3c37ff1d38e027512c1e22cbb2942338d961d03adfbaf1b3b8810"
+    },
+    {
+      "path": "examples/public/white-marble/prompt.txt",
+      "bytes": 53,
+      "sha256": "c5c67331b6abc70bba91ccf75427d44ac439263e359bc7953b309638bc688edd"
+    },
+    {
+      "path": "examples/README.md",
+      "bytes": 4795,
+      "sha256": "9e3b85b2a7a2495248a9b23e9c7d19a4333968cb63741477eb464f067c416abe"
+    },
+    {
+      "path": "examples/README_zh-CN.md",
+      "bytes": 4516,
+      "sha256": "a7f53266bc1ce5b98d5c300a212413353d8482b834f94214b860139f6a509ab9"
+    },
+    {
+      "path": "LICENSE",
+      "bytes": 1075,
+      "sha256": "082e1c7cb79f0d60be5e24e31ea3e273f280cb12c1ec7ee688a839040a52222f"
+    },
+    {
+      "path": "MODEL_CARD.md",
+      "bytes": 3745,
+      "sha256": "79ad296c84c37cd758ba0c9f7a094c9ddb381ebd47bc5331242f9c51ebcf6d82"
+    },
+    {
+      "path": "pyproject.toml",
+      "bytes": 1138,
+      "sha256": "57ae4050f84428e54d04c858d3e1a101108415edaa4e911318e5dd028e12f10a"
+    },
+    {
+      "path": "README.md",
+      "bytes": 4903,
+      "sha256": "f84375091dad8a6241b119cf21902822fc839b5797306cf48861a1fea91111d9"
+    },
+    {
+      "path": "README_zh-CN.md",
+      "bytes": 3678,
+      "sha256": "653b668b36447f54b25b3e20a1d455e5b3a8e4f13a83c28e99d387098d085f0c"
+    },
+    {
+      "path": "RELEASE_CHECKLIST.md",
+      "bytes": 1107,
+      "sha256": "4825f23a12a4e04cf7564db32faa7afdf1810fea7b492c5de60f22de6f1376c5"
+    },
+    {
+      "path": "REMOTE_SYNC_POLICY.md",
+      "bytes": 768,
+      "sha256": "000e377c238ce3715ce8f00e6c2d00f88c532502cc1a6a77a7b8981a35219fb3"
+    },
+    {
+      "path": "requirements.txt",
+      "bytes": 34,
+      "sha256": "020525593785d1bc464f598ac8f619087ce8b45d748ab51b94cd1c91c8485092"
+    },
+    {
+      "path": "SECURITY.md",
+      "bytes": 343,
+      "sha256": "baf43ccdfbff67907c9b7d15f08eb95380ad793c572a37115567115997ea5144"
+    },
+    {
+      "path": "src/skpbr/__init__.py",
+      "bytes": 188,
+      "sha256": "7c601650c89eb16c5b1710d8bbc27a914775fecdf2f0e7b1d00156119ee896ac"
+    },
+    {
+      "path": "src/skpbr/cli.py",
+      "bytes": 8223,
+      "sha256": "338c40c46d6b0fcbb08358dbe106d3aac3998f4290da5a9e503164c8fd74b0a5"
+    },
+    {
+      "path": "src/skpbr/io.py",
+      "bytes": 2913,
+      "sha256": "eee8ac6cf4370834ff3241fae33ca9dda976b67deed1f27a32bacb9e8f2f0ec3"
+    },
+    {
+      "path": "src/skpbr/model.py",
+      "bytes": 5698,
+      "sha256": "9ab26890bb9d386e541cea0ce4866dbaa9b822503d5ecba89abb960fb59d89b8"
+    },
+    {
+      "path": "src/skpbr/prompt.py",
+      "bytes": 12872,
+      "sha256": "36af70a79d7b6deb81fd9e07526b69fb547795876f03fa7fcd72a6d15699776c"
+    },
+    {
+      "path": "src/skpbr/weights/skpbr_v0_1_state_dict.pt",
+      "bytes": 1097405,
+      "sha256": "be8e61838941614881cfe46e90154c9c05418caf5bb4bea17b1aa89996c193d3"
+    },
+    {
+      "path": "tests/test_public_contract.py",
+      "bytes": 4314,
+      "sha256": "a70af27c777d3233e944bdf8e8c1805b18394a58804c54a5d2ebc64af88a434d"
+    },
+    {
+      "path": "THIRD_PARTY.md",
+      "bytes": 392,
+      "sha256": "daadeae6eb43e46140c92119105fdb466c54cdc13facc193565d25ec1a6d9c5f"
+    },
+    {
+      "path": "tools/release_audit.py",
+      "bytes": 7427,
+      "sha256": "126857fe09b5cfa24b5fee2e73f90ab21827de7c543e0a1bb1a89f1ade5854b4"
+    }
+  ]
+}

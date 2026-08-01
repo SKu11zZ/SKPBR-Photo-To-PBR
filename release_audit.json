@@ -1,0 +1,26 @@
+{
+  "schema": "skpbr-public-release-audit-v1",
+  "generated_utc": "2026-08-01T11:39:16.332884+00:00",
+  "status": "passed",
+  "checks": {
+    "local_absolute_paths": [],
+    "private_workspace_tokens": [],
+    "forbidden_image_or_scene_assets": [],
+    "missing_public_example_files": [],
+    "invalid_public_example_dimensions": [],
+    "public_example_prompt_mismatches": [],
+    "approved_public_example_png_count": 33,
+    "checkpoint_tensor_only": true,
+    "checkpoint_state_tensors": 104,
+    "checkpoint_parameter_count": 266241,
+    "checkpoint_private_tokens": []
+  },
+  "excluded_private_artifact_classes": [
+    "training images and PBR maps",
+    "tensor and render caches",
+    "resume and optimizer checkpoints",
+    "sample identities and split manifests",
+    "per-example shadow records",
+    "third-party material assets"
+  ]
+}
