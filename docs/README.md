@@ -1,6 +1,6 @@
 # SKPBR documentation
 
-[Back to English README](../README.md) | [返回中文 README](../README_zh-CN.md)
+[Back to English README](../README.md#english) | [返回中文 README](../README.md#简体中文)
 
 ## Model and data
 
