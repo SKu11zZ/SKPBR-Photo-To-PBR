@@ -2,41 +2,50 @@
 
 **English** | [简体中文](README_zh-CN.md)
 
-> **SKPBR is a 266,241-parameter single-image + Prompt BaseColor calibrator that produces a 1024px BaseColor from a controlled Suzanne/Light-Stage input and a frozen parent PBR, while preserving Roughness, Metallic, Normal, Height, and AO bit-for-bit; it is not a general solution for arbitrary photos, arbitrary geometry, or production-ready PBR reconstruction.**
+SKPBR started as a small material experiment for one of my own game projects. The part released here has **266,241 parameters**. Given a controlled Suzanne/Light-Stage render, an English material Prompt, and a parent PBR prediction, it corrects the BaseColor at up to 1024px and passes Roughness, Metallic, Normal, Height, and AO through unchanged.
 
-SKPBR v0.1 is a transparent research preview of the final calibration head developed in a larger single-image material-reconstruction experiment. This repository intentionally contains only the small, source-free calibration component whose weights and runtime can be audited independently.
+One thing should be clear up front: this is not yet a “drop in any photo and get a finished PBR material” model. The public package is the final BaseColor calibration head, not the complete private RGB-to-PBR research stack. It still needs a parent PBR input and a known visible-UV confidence map.
 
-The project was originally developed as an experimental material tool for the author's own game project.
+## Where it works today
 
-## What this release does
+The current model is useful when the setup is controlled:
 
-The command-line runtime accepts:
+- one Suzanne render using the known camera, UV layout, and Light-Stage-style lighting;
+- one short English Prompt such as `dark rough cast iron`;
+- six parent PBR maps: BaseColor, Roughness, Metallic, Normal, Height, and AO;
+- one visible-confidence map for the projected UV region.
 
-- one RGB reference render;
-- one English material Prompt;
-- a frozen parent PBR prediction containing BaseColor, Roughness, Metallic, Normal, Height, and AO;
-- a visible-confidence map for the known UV projection.
+It produces a corrected BaseColor. The other five maps are copied bit-for-bit, so the head cannot quietly change geometry detail or surface response behind your back. The result is tied to the known UV layout; it is not guaranteed to tile cleanly on another mesh.
 
-It creates a new BaseColor and copies the other five parent maps without modification. The saved output is object-UV-specific, not a guaranteed seamless material for arbitrary meshes.
+## A few honest examples
 
-## What this release does not do
+These four inputs were made from new procedural recipes and rendered in Blender Cycles at 1024px. The frozen research pipeline saw only the RGB render and the exact Prompt. None of the results below were cleaned up afterward.
 
-- It does not contain the upstream RGB-to-parent-PBR stack.
-- It does not infer a complete PBR material from an arbitrary photograph by itself.
-- It is not validated for arbitrary geometry, cameras, lighting, backgrounds, or UV layouts.
-- It is not intended for SSS, transmission, opacity, hair, skin, fluids, or volumetric materials.
-- It is not a production release. The frozen external shadow failed 3 of 11 release gates.
+![Four SKPBR procedural examples: input, output render, and six output maps](examples/public/contact_sheet.png)
 
-## Install
+[Open the full-resolution inputs, Prompts, output renders, and all six maps.](examples/README.md)
+
+The failures are left in the image on purpose. You can see periodic UV/projection dots, weak fine marble veins, rough steel becoming too pale and slightly green, and cyan clearcoat shifting toward saturated blue. This is a progress snapshot, not a polished demo reel.
+
+## Then I tried twelve broader material types
+
+This second run was meant to find the boundary, not to make the model look good. Blue glazed ceramic and red brick came out relatively close. Oxidized copper, cork, and denim caught only part of the material. Brushed aluminum, powder-coated steel, black ABS, granite, concrete, carbon fiber, and leather all had obvious identity or color failures.
+
+So the 73 active material families in the research directory should not be read as 73 materials the model can already reconstruct reliably. Sand is still reference-only and is not included here.
+
+<details>
+  <summary>Open the 12-material bilingual long sheet</summary>
+  <p><img alt="SKPBR 12-material coverage audit" src="examples/coverage-12/contact_sheet_long.png"></p>
+</details>
+
+[Read the full report and per-channel numbers.](docs/COVERAGE_AUDIT_12.md) The full-resolution input, output render, and six maps for every case are under [examples/coverage-12](examples/coverage-12/README.md).
+
+## Running the public head
 
 ```bash
 python -m venv .venv
 python -m pip install -e .
 ```
-
-CUDA is optional. CPU inference is supported but slower.
-
-## Run
 
 The parent directory must contain `basecolor.png`, `roughness.png`, `metallic.png`, `normal.png`, `height.png`, and `ao.png`.
 
@@ -49,43 +58,37 @@ skpbr \
   --output outputs/cast_iron
 ```
 
-The runtime refuses to overwrite an existing output directory. Use `--device cpu`, `--device cuda`, or the default `--device auto`.
+The command refuses to overwrite an existing output directory. CPU and CUDA inference are both supported through `--device cpu`, `--device cuda`, or the default `--device auto`.
 
-## Four honest examples
+## The numbers, without dressing them up
 
-The following examples use four newly created procedural materials, rendered on Suzanne with Blender Cycles at 1024px. Inference received only the rendered RGB image and the exact English Prompt. The examples were run through the complete frozen research pipeline; the public package in this repository contains only its final 266,241-parameter S12 calibration head and therefore still requires a parent PBR input.
+The frozen external shadow contained 81 examples from 59 source-disjoint identities. SKPBR improved BaseColor MAE over the uncalibrated parent by about **53.3%**, but it was still **22.9% worse** than the stronger frozen D36 color baseline. It passed 8 of 11 release gates, so v0.1 remains a research preview.
 
-![Four SKPBR procedural examples: input, output render, and six output maps](examples/public/contact_sheet.png)
+| Metric | Result |
+|---|---:|
+| Parent BaseColor MAE | 0.19143 |
+| Frozen D36 BaseColor MAE | 0.07272 |
+| SKPBR BaseColor MAE | 0.08935 |
+| Item non-regression rate | 92.59% — fail |
+| Catastrophic item rate | 4.94% — fail |
+| Screen-substitution consistency MAE | 0.0 — pass |
+| Parent-detail correlation | 0.96742 — pass |
+| Development/shadow identity overlap | 0 — pass |
 
-[Open the full-resolution inputs, Prompts, output renders, and all six PBR maps.](examples/README.md)
+No weight, threshold, or published metric was changed after that one-shot evaluation.
 
-These are unedited model results, not selected ground truth or post-processed artwork. Known problems remain visible: periodic UV/projection dots, weak fine-vein recovery in white marble, a pale/green cast in rough steel, and a saturated-blue shift in cyan automotive clearcoat.
+## Current boundary
 
-## Public evaluation
+The main unresolved problem is color: the final head is deliberately very stable under lighting changes, but that stability also makes it throw away some useful evidence from the input image. Fine, high-density patterns such as marble veins, patina, and irregular gravel structure are also weaker than they should be.
 
-The frozen one-shot external shadow used 81 examples from 59 source-disjoint identities. Only aggregate metrics are published here.
+The model has not been validated for arbitrary phone photos, arbitrary geometry, unknown cameras, unknown UVs, SSS, transmission, opacity, hair, skin, fluids, or volumetric materials. If your use case depends on any of those, assume it is unsupported until it is tested.
 
-| Metric | SKPBR v0.1 | Result |
-|---|---:|---|
-| Parent BaseColor MAE | 0.19143 | reference |
-| Frozen D36 BaseColor MAE | 0.07272 | stronger color baseline |
-| SKPBR BaseColor MAE | 0.08935 | 53.3% better than parent |
-| SKPBR / parent MAE | 0.46676 | pass |
-| SKPBR / D36 MAE | 1.22873 | fail |
-| Item non-regression rate | 92.59% | fail |
-| Catastrophic item rate | 4.94% | fail |
-| Screen-substitution consistency MAE | 0.0 | pass |
-| Parent-detail correlation | 0.96742 | pass |
-| Identity overlap | 0 | pass |
+## What is actually published
 
-The result is reported as-is. The held-out targets were not used to change weights, thresholds, or the published metrics after evaluation.
+The repository contains the small inference package, a tensor-only checkpoint, tests, four focused examples, the 12-material coverage audit, and aggregate evaluation numbers. It does not contain training/evaluation images, private source PBR maps, commercial material assets, caches, optimizer states, local paths, sample identities, or nearest-neighbor catalogs.
 
-## Repository privacy
-
-Apart from the four newly generated procedural public examples above, this repository does not include training or evaluation images, source PBR maps, material-library assets, training caches, optimizer states, local filesystem paths, per-example evaluation records, or nearest-neighbor catalogs. The checkpoint is a tensor-only state dictionary and should be loaded with `weights_only=True`.
-
-See the [model card](docs/MODEL_CARD.md), [data policy](docs/DATA_POLICY.md), and [release checklist](docs/RELEASE_CHECKLIST.md) before publishing or redistributing the weights. The remaining technical and release documents are collected in the [documentation index](docs/README.md).
+The more formal material is kept out of the front page: [model card](docs/MODEL_CARD.md), [data policy](docs/DATA_POLICY.md), [release checklist](docs/RELEASE_CHECKLIST.md), and [documentation index](docs/README.md).
 
 ## License
 
-Repository-authored code and the exported SKPBR weight file are provided under the [MIT License](LICENSE). This license does not grant rights to any third-party training or reference assets, none of which are included here.
+Repository-authored code and the exported SKPBR weight file are released under the [MIT License](LICENSE). MIT does not grant redistribution rights for third-party source assets; none of those assets are included here.

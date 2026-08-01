@@ -6,6 +6,8 @@
 
 完整研究管线生成了这些六贴图结果；可安装的公开包只包含最终 S12 BaseColor 校准头，无法单独完成上游父 PBR 预测。
 
+更宽、失败也更多的一轮测试见 [12 类材质覆盖审计](coverage-12/README_zh-CN.md)。
+
 ## 深色橡胶
 
 Prompt：`dark rubber, rough matte finish`

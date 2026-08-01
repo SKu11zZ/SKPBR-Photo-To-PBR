@@ -9,7 +9,7 @@ description = "A research-preview, prompt-conditioned BaseColor calibrator for c
 readme = "README.md"
 requires-python = ">=3.10"
 license = { file = "LICENSE" }
-authors = [{ name = "Moore \"Zz11uKS\" Ji" }]
+authors = [{ name = "SKu11zZ" }]
 keywords = ["pbr", "material-reconstruction", "basecolor", "blender", "computer-vision"]
 classifiers = [
   "Development Status :: 3 - Alpha",

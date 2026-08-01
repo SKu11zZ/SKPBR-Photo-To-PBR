@@ -10,7 +10,7 @@ SKPBR's public repository is intentionally separated from its private research w
 - Tensor-only model state dictionary.
 - Aggregate model-card metrics.
 - Tests and release-audit tooling.
-- Four newly generated, deterministic procedural example inputs and their unedited frozen-pipeline outputs.
+- Sixteen newly generated, deterministic procedural example inputs and their unedited frozen-pipeline outputs: four focused demos and a 12-material coverage audit.
 
 ## Excluded
 
@@ -27,7 +27,7 @@ SKPBR's public repository is intentionally separated from its private research w
 
 The public weight file contains only named tensors required by `SKPBRBaseColorCalibrator.load_state_dict`. It contains no training metadata or local path strings.
 
-The files under `examples/public` were generated from scratch for this release. They are not members of the training, validation, or external-shadow sets and do not contain third-party material-library content.
+The files under `examples/public` and `examples/coverage-12` were generated from scratch for this release. They are not members of the training, validation, or external-shadow sets and do not contain third-party material-library content.
 
 ## Third-party rights
 

@@ -6,6 +6,8 @@ These four examples are unedited outputs from the frozen SKPBR research pipeline
 
 The complete research pipeline generated these six-map outputs. The installable public package contains only the final S12 BaseColor calibration head and cannot reproduce the upstream parent-PBR prediction by itself.
 
+For the wider and much less flattering test, see the [12-material coverage audit](coverage-12/README.md).
+
 ## Dark rubber
 
 Prompt: `dark rubber, rough matte finish`

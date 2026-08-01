@@ -41,6 +41,7 @@ FORBIDDEN_ASSET_SUFFIXES = {
 }
 INTERNAL_TOKENS = (
     "LightStage" + "Build",
+    "jishu" + "yuan",
     "r1_" + "mvp",
     "d37s12" + "shadow",
     "source_" + "identity",
@@ -56,13 +57,81 @@ PUBLIC_EXAMPLE_PROMPTS = {
     "cyan-automotive-clearcoat": "cyan blue automotive clearcoat, glossy metallic finish",
 }
 PUBLIC_EXAMPLE_MAPS = ("basecolor", "roughness", "metallic", "normal", "height", "ao")
-ALLOWED_PUBLIC_PNGS = {"examples/public/contact_sheet.png"}
+COVERAGE_EXAMPLES = {
+    "brushed-aluminum": (
+        "拉丝铝 / Brushed Aluminum",
+        "brushed aluminum with fine directional scratches, satin metallic finish",
+    ),
+    "oxidized-copper": (
+        "氧化铜 / Oxidized Copper",
+        "oxidized copper with irregular green patina and exposed warm copper",
+    ),
+    "red-powder-coated-steel": (
+        "红色粉末涂层钢 / Red Powder-Coated Steel",
+        "deep red powder-coated steel with fine orange-peel texture, semi-matte finish",
+    ),
+    "black-abs-plastic": (
+        "黑色 ABS 塑料 / Black ABS Plastic",
+        "black ABS plastic with subtle molded grain, matte finish",
+    ),
+    "speckled-granite": (
+        "斑点花岗岩 / Speckled Granite",
+        "gray speckled granite with black and pale mineral grains, honed finish",
+    ),
+    "weathered-concrete": (
+        "风化混凝土 / Weathered Concrete",
+        "weathered gray concrete with pores, aggregate marks and a rough dry surface",
+    ),
+    "red-brick": (
+        "红砖 / Red Brick",
+        "fired red brick with warm color variation, fine pits and a dry rough finish",
+    ),
+    "blue-glazed-ceramic": (
+        "蓝色釉面陶瓷 / Blue Glazed Ceramic",
+        "cobalt blue glazed ceramic with subtle cloudy variation and glossy finish",
+    ),
+    "carbon-fiber": (
+        "碳纤维复合材料 / Carbon Fiber Composite",
+        "dark carbon fiber composite with a fine two-by-two twill weave and satin clear coat",
+    ),
+    "natural-cork": (
+        "天然软木 / Natural Cork",
+        "natural tan cork with irregular dark pores and a dry matte surface",
+    ),
+    "brown-grain-leather": (
+        "棕色粒面皮革 / Brown Grain Leather",
+        "medium brown grain leather with natural creases and a soft semi-matte finish",
+    ),
+    "blue-denim": (
+        "蓝色牛仔布 / Blue Denim Fabric",
+        "indigo blue denim fabric with visible diagonal twill weave and a dry soft finish",
+    ),
+}
+PUBLIC_SHEET_DIMENSIONS = {
+    "examples/public/contact_sheet.png": (1900, 1725),
+    "examples/coverage-12/contact_sheet_long.png": (2160, 5040),
+    "examples/coverage-12/contact_sheet_part_01.png": (2160, 1770),
+    "examples/coverage-12/contact_sheet_part_02.png": (2160, 1620),
+    "examples/coverage-12/contact_sheet_part_03.png": (2160, 1650),
+}
+ALLOWED_PUBLIC_PNGS = set(PUBLIC_SHEET_DIMENSIONS)
 for _slug in PUBLIC_EXAMPLE_PROMPTS:
     ALLOWED_PUBLIC_PNGS.update(
         {
             f"examples/public/{_slug}/input.png",
             f"examples/public/{_slug}/output_render.png",
             *(f"examples/public/{_slug}/maps/{name}.png" for name in PUBLIC_EXAMPLE_MAPS),
+        }
+    )
+for _slug in COVERAGE_EXAMPLES:
+    ALLOWED_PUBLIC_PNGS.update(
+        {
+            f"examples/coverage-12/materials/{_slug}/input.png",
+            f"examples/coverage-12/materials/{_slug}/output_render.png",
+            *(
+                f"examples/coverage-12/materials/{_slug}/maps/{name}.png"
+                for name in PUBLIC_EXAMPLE_MAPS
+            ),
         }
     )
 
@@ -100,11 +169,16 @@ def audit() -> tuple[dict[str, object], dict[str, object]]:
             and relative not in ALLOWED_PUBLIC_PNGS
         ):
             forbidden_assets.append(relative)
-        if relative in ALLOWED_PUBLIC_PNGS and relative != "examples/public/contact_sheet.png":
+        if relative in ALLOWED_PUBLIC_PNGS:
+            expected_dimensions = PUBLIC_SHEET_DIMENSIONS.get(relative, (1024, 1024))
             with Image.open(path) as image:
-                if image.size != (1024, 1024):
+                if image.size != expected_dimensions:
                     invalid_example_dimensions.append(
-                        {"file": relative, "dimensions": list(image.size)}
+                        {
+                            "file": relative,
+                            "dimensions": list(image.size),
+                            "expected": list(expected_dimensions),
+                        }
                     )
         if path.suffix.casefold() in TEXT_SUFFIXES or path.name == ".gitignore":
             value = path.read_text(encoding="utf-8")
@@ -124,6 +198,30 @@ def audit() -> tuple[dict[str, object], dict[str, object]]:
         if actual != expected:
             prompt_mismatches.append(
                 {"file": relative, "expected": expected, "actual": actual}
+            )
+    for slug, (expected_name, expected_prompt) in COVERAGE_EXAMPLES.items():
+        root = f"examples/coverage-12/materials/{slug}"
+        checks = {
+            f"{root}/material_name.txt": expected_name,
+            f"{root}/prompt_en.txt": expected_prompt,
+        }
+        for relative, expected in checks.items():
+            path = relative_files.get(relative)
+            actual = path.read_text(encoding="utf-8").strip() if path else None
+            if actual != expected:
+                prompt_mismatches.append(
+                    {"file": relative, "expected": expected, "actual": actual}
+                )
+        relative = f"{root}/prompt_zh-CN.txt"
+        path = relative_files.get(relative)
+        actual = path.read_text(encoding="utf-8").strip() if path else None
+        if not actual or not actual.endswith("中文译文仅用于展示，未输入模型。"):
+            prompt_mismatches.append(
+                {
+                    "file": relative,
+                    "expected": "Chinese display translation ending with the non-input disclosure",
+                    "actual": actual,
+                }
             )
     if not CHECKPOINT.is_file():
         raise FileNotFoundError(CHECKPOINT)

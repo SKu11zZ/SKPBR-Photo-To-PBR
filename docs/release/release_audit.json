@@ -1,6 +1,6 @@
 {
   "schema": "skpbr-public-release-audit-v1",
-  "generated_utc": "2026-08-01T11:48:32.018116+00:00",
+  "generated_utc": "2026-08-01T12:27:33.589154+00:00",
   "status": "passed",
   "checks": {
     "local_absolute_paths": [],
@@ -9,7 +9,7 @@
     "missing_public_example_files": [],
     "invalid_public_example_dimensions": [],
     "public_example_prompt_mismatches": [],
-    "approved_public_example_png_count": 33,
+    "approved_public_example_png_count": 133,
     "checkpoint_tensor_only": true,
     "checkpoint_state_tensors": 104,
     "checkpoint_parameter_count": 266241,
