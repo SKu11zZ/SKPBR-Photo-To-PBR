@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "skpbr"
-version = "0.1.0"
-description = "A research-preview, prompt-conditioned BaseColor calibrator for controlled single-image PBR reconstruction."
+version = "0.2.0"
+description = "A research-preview model for aligned image-plus-text PBR reconstruction and experimental text-only material generation."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { file = "LICENSE" }
@@ -13,7 +13,7 @@ authors = [{ name = "SKu11zZ" }]
 keywords = ["pbr", "material-reconstruction", "basecolor", "blender", "computer-vision"]
 classifiers = [
   "Development Status :: 3 - Alpha",
-  "License :: OSI Approved :: MIT License",
+  "License :: OSI Approved :: Apache Software License",
   "Programming Language :: Python :: 3",
   "Topic :: Multimedia :: Graphics :: 3D Modeling",
 ]

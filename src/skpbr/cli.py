@@ -1,237 +1,150 @@
-"""Command-line entry point for the SKPBR v0.1 calibration head."""
+"""Command-line interface for planar image+text reconstruction and text-only generation."""
 
 from __future__ import annotations
 
 import argparse
-from contextlib import nullcontext
-from importlib.resources import files
+from datetime import datetime, timezone
 import json
-import os
 from pathlib import Path
-import shutil
-import time
 
 import torch
-import torch.nn.functional as F
 
 from .io import (
-    NON_BASECOLOR_MAPS,
-    original_map_size,
-    parent_tensor,
-    save_rgb,
-    screen_tensor,
+    load_rgb,
+    periodic_seed_field,
+    render_plane,
+    save_json,
+    save_map_set,
+    save_preview,
     sha256,
 )
-from .model import SKPBRBaseColorCalibrator, parameter_count
-from .prompt import CONDITION_DIM, parse_prompt
+from .model import (
+    PromptRemediatedPBRNet,
+    parameter_manifest,
+    rich_periodic_seed_field,
+)
+from .prompt import parse_prompt
 
 
-EXPECTED_PARAMETERS = 266_241
-HARD_MAX_GIB = 8.0
-ABORT_GUARD_GIB = 7.8
+DEFAULT_CHECKPOINT_SHA256 = "41613188fa82114b331dc22bb1449ec24b6a02975c7e67ead092ddd60aa4045b"
 
 
-def default_checkpoint() -> Path:
-    return Path(str(files("skpbr").joinpath("weights/skpbr_v0_1_state_dict.pt")))
+def default_checkpoint() -> str:
+    return str(Path(__file__).resolve().parent / "weights" / "skpbr_v0_2_dualmode.pt")
 
 
-def arguments() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
-        description="Run the SKPBR v0.1 BaseColor calibration head."
-    )
-    parser.add_argument("--image", type=Path, required=True)
-    parser.add_argument("--prompt", required=True)
-    parser.add_argument("--parent-dir", type=Path, required=True)
-    parser.add_argument("--visible-confidence", type=Path, required=True)
-    parser.add_argument("--output", type=Path, required=True)
-    parser.add_argument("--checkpoint", type=Path, default=default_checkpoint())
-    parser.add_argument(
-        "--device", choices=("auto", "cpu", "cuda"), default="auto"
-    )
-    return parser.parse_args()
-
-
-def select_device(requested: str) -> torch.device:
+def resolve_device(requested: str) -> torch.device:
     if requested == "auto":
-        requested = "cuda" if torch.cuda.is_available() else "cpu"
+        return torch.device("cuda" if torch.cuda.is_available() else "cpu")
     if requested == "cuda" and not torch.cuda.is_available():
-        raise RuntimeError("CUDA was requested but is unavailable")
+        raise RuntimeError("CUDA was requested but is unavailable; use --device cpu")
     return torch.device(requested)
 
 
-def validate_inputs(options: argparse.Namespace) -> None:
-    required = [
-        options.image,
-        options.visible_confidence,
-        options.checkpoint,
-        options.parent_dir / "basecolor.png",
-        *(options.parent_dir / f"{name}.png" for name in NON_BASECOLOR_MAPS),
-    ]
-    for path in required:
-        if not path.is_file():
-            raise FileNotFoundError(path)
-    if options.output.exists():
-        raise RuntimeError(f"Refusing to overwrite {options.output}")
-
-
-def load_model(checkpoint: Path, device: torch.device) -> SKPBRBaseColorCalibrator:
-    state = torch.load(checkpoint, map_location=device, weights_only=True)
-    if not isinstance(state, dict) or not state:
-        raise RuntimeError("SKPBR checkpoint is not a state dictionary")
-    if not all(isinstance(key, str) and torch.is_tensor(value) for key, value in state.items()):
-        raise RuntimeError("SKPBR checkpoint contains non-tensor metadata")
-    model = SKPBRBaseColorCalibrator().to(device)
-    model.load_state_dict(state, strict=True)
-    model.screen_feature_scale = 0.0
-    model.eval().requires_grad_(False)
-    if parameter_count(model) != EXPECTED_PARAMETERS:
-        raise RuntimeError("SKPBR parameter count changed")
-    return model
-
-
-def device_used_gib() -> float:
-    free, total = torch.cuda.mem_get_info()
-    return (total - free) / 1024**3
+def load_model(checkpoint: Path, device: torch.device) -> tuple[PromptRemediatedPBRNet, dict[str, object]]:
+    if not checkpoint.is_file():
+        raise FileNotFoundError(checkpoint)
+    digest = sha256(checkpoint)
+    if checkpoint.resolve() == Path(default_checkpoint()).resolve() and digest != DEFAULT_CHECKPOINT_SHA256:
+        raise RuntimeError("Bundled checkpoint SHA-256 mismatch")
+    payload = torch.load(checkpoint, map_location="cpu", weights_only=True)
+    if not isinstance(payload, dict) or not isinstance(payload.get("model"), dict):
+        raise RuntimeError("Expected a tensor-only SKPBR v0.2 checkpoint payload")
+    model = PromptRemediatedPBRNet()
+    model.load_state_dict(payload["model"], strict=True)
+    return model.to(device).eval(), payload
 
 
 @torch.inference_mode()
 def run(options: argparse.Namespace) -> dict[str, object]:
-    validate_inputs(options)
-    device = select_device(options.device)
-    if device.type == "cuda":
-        torch.cuda.empty_cache()
-        torch.cuda.reset_peak_memory_stats()
-    started = time.perf_counter()
-    model = load_model(options.checkpoint, device)
-    size = original_map_size(options.parent_dir)
-    screen = screen_tensor(options.image, device)
-    parent_512 = parent_tensor(
-        options.parent_dir,
-        options.visible_confidence,
-        device,
-        size=512,
-    )
-    parent_original = parent_tensor(
-        options.parent_dir,
-        options.visible_confidence,
-        device,
-        size=size,
-    )
-    parsed = parse_prompt(options.prompt)
-    condition = torch.tensor(
-        parsed["condition_vector"], dtype=torch.float32, device=device
-    )[None]
-    if condition.shape != (1, CONDITION_DIM):
-        raise RuntimeError("Prompt condition contract changed")
-    context = (
-        torch.amp.autocast("cuda", dtype=torch.float16)
-        if device.type == "cuda"
-        else nullcontext()
-    )
-    with context:
-        result = model(screen, parent_512, condition)
-    residual = F.interpolate(
-        result["residual"].float(),
-        size=(size, size),
-        mode="bicubic",
-        align_corners=False,
-    )
-    basecolor = (
-        parent_original[:, :3]
-        * torch.exp(result["log_gain"].float()[:, :, None, None])
-        + result["bias"].float()[:, :, None, None]
-        + residual
-    ).clamp(0.0, 1.0)
-    peak_allocated = (
-        torch.cuda.max_memory_allocated() / 1024**3
-        if device.type == "cuda"
-        else 0.0
-    )
-    whole_device = device_used_gib() if device.type == "cuda" else 0.0
-    if peak_allocated >= ABORT_GUARD_GIB or whole_device >= ABORT_GUARD_GIB:
-        raise RuntimeError(
-            "SKPBR reached the 7.8 GiB abort guard: "
-            f"allocated={peak_allocated:.3f}, whole_device={whole_device:.3f}"
-        )
+    output = Path(options.output)
+    if output.exists() and any(output.iterdir()):
+        raise FileExistsError(f"Refusing to overwrite non-empty output: {output}")
+    resolution = int(getattr(options, "resolution", 512))
+    if resolution < 128 or resolution > 1024 or resolution % 16:
+        raise ValueError("Resolution must be a multiple of 16 between 128 and 1024")
+    device = resolve_device(str(options.device))
+    checkpoint = Path(options.checkpoint)
+    model, payload = load_model(checkpoint, device)
+    parsed = parse_prompt(str(options.prompt))
+    condition = torch.from_numpy(parsed["condition"]).unsqueeze(0).to(device)
+    seed = torch.tensor([int(options.seed)], dtype=torch.long, device=device)
+    image_path = Path(options.image) if getattr(options, "image", None) else None
 
-    temporary = options.output.with_name(options.output.name + ".writing")
-    if temporary.exists():
-        raise RuntimeError(f"Partial temporary output exists: {temporary}")
-    temporary.mkdir(parents=True, exist_ok=False)
-    save_rgb(temporary / "basecolor.png", basecolor)
-    passthrough = []
-    for name in NON_BASECOLOR_MAPS:
-        source = options.parent_dir / f"{name}.png"
-        destination = temporary / f"{name}.png"
-        shutil.copy2(source, destination)
-        source_hash = sha256(source)
-        output_hash = sha256(destination)
-        passthrough.append(
-            {
-                "map": name,
-                "source_sha256": source_hash,
-                "output_sha256": output_hash,
-                "bit_exact": source_hash == output_hash,
-            }
-        )
-    if not all(bool(row["bit_exact"]) for row in passthrough):
-        raise RuntimeError("A non-BaseColor map changed")
-    metadata = {
-        "schema": "skpbr-v0.1-runtime-v1",
-        "model": "SKPBR",
-        "version": "0.1.0",
-        "research_preview": True,
-        "prompt": options.prompt,
+    if image_path is not None:
+        mode = "image_prompt_reconstruction"
+        image = load_rgb(image_path, resolution).unsqueeze(0).to(device)
+        presence = image.new_ones((1, 1, resolution, resolution))
+        seed_field = image.new_zeros((1, 6, resolution, resolution))
+        rich_seed = image.new_zeros((1, 12, resolution, resolution))
+    else:
+        mode = "prompt_seed_generation"
+        image = torch.zeros((1, 3, resolution, resolution), device=device)
+        presence = torch.zeros((1, 1, resolution, resolution), device=device)
+        seed_field = periodic_seed_field(seed, resolution, resolution, channels=6)
+        rich_seed = rich_periodic_seed_field(seed, resolution, resolution)
+
+    with torch.autocast(
+        device_type=device.type,
+        dtype=torch.float16,
+        enabled=device.type == "cuda",
+    ):
+        maps = model(image, presence, condition, seed_field, rich_seed)["maps"][0]
+
+    output.mkdir(parents=True, exist_ok=True)
+    save_map_set(output / "maps", maps)
+    save_preview(output / "preview.png", render_plane(maps.unsqueeze(0), variant=0)[0])
+    metadata: dict[str, object] = {
+        "schema": "skpbr-v0.2-dualmode-inference",
+        "created_utc": datetime.now(timezone.utc).isoformat(),
+        "mode": mode,
+        "mode_semantics": (
+            "visible aligned planar material reconstruction"
+            if image_path is not None
+            else "plausible deterministic material candidate; not source reconstruction"
+        ),
+        "prompt": str(options.prompt),
         "parsed_prompt": {
-            "archetype": parsed["archetype"],
+            "material_class": parsed["material_class"],
+            "physical_regime": parsed["physical_regime"],
             "color": parsed["color"],
             "finish": parsed["finish"],
-            "spatial_family": parsed["spatial_family"],
-            "spatial_effects": parsed["spatial_effects"],
         },
-        "model_parameter_count": parameter_count(model),
-        "screen_feature_scale": 0.0,
-        "output_resolution": [size, size],
-        "correction": {
-            "log_gain": result["log_gain"][0].float().cpu().tolist(),
-            "bias": result["bias"][0].float().cpu().tolist(),
-            "residual_mean_abs": float(residual.abs().mean()),
-            "residual_max_abs": float(residual.abs().amax()),
+        "seed": int(options.seed) if image_path is None else None,
+        "resolution": [resolution, resolution],
+        "maps": ["BaseColor", "Roughness", "Metallic", "Normal OpenGL +Y", "Height", "AO"],
+        "model": parameter_manifest(model),
+        "checkpoint_sha256": sha256(checkpoint),
+        "checkpoint_epoch": payload.get("epoch"),
+        "target_or_library_asset_reads": 0,
+        "known_status": {
+            "image_prompt_mode": "MVP research preview; frozen D10 gates passed, but dark leather and denim remain weak",
+            "prompt_only_mode": "experimental; the final Fresh-12B identity gate failed at 6/12",
+            "resolution": "512 px is the evaluated release resolution",
         },
-        "non_basecolor_passthrough": passthrough,
-        "runtime_asset_reads": {
-            "input_image": 1,
-            "parent_prediction": 1,
-            "visible_confidence": 1,
-            "checkpoint": 1,
-            "training_images": 0,
-            "target_maps": 0,
-            "source_material_library": 0,
-            "nearest_neighbors": 0,
-        },
-        "files": {
-            "input_name": options.image.name,
-            "checkpoint_sha256": sha256(options.checkpoint),
-            "input_sha256": sha256(options.image),
-            "basecolor_sha256": sha256(temporary / "basecolor.png"),
-        },
-        "device": str(device),
-        "peak_allocated_vram_gib": peak_allocated,
-        "peak_whole_device_vram_gib": whole_device,
-        "peak_vram_gib_hard_max": HARD_MAX_GIB,
-        "runtime_seconds": time.perf_counter() - started,
     }
-    (temporary / "metadata.json").write_text(
-        json.dumps(metadata, ensure_ascii=False, indent=2) + "\n",
-        encoding="utf-8",
-    )
-    options.output.parent.mkdir(parents=True, exist_ok=True)
-    os.replace(temporary, options.output)
+    save_json(output / "inference_manifest.json", metadata)
     return metadata
+
+
+def arguments() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Reconstruct PBR maps from an aligned flat image plus text, or generate an experimental text-only candidate."
+    )
+    parser.add_argument("--image", type=Path, help="Optional aligned planar RGB material image")
+    parser.add_argument("--prompt", required=True, help="English or Chinese material description")
+    parser.add_argument("--seed", type=int, default=41, help="Deterministic text-only variation seed")
+    parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--checkpoint", type=Path, default=Path(default_checkpoint()))
+    parser.add_argument("--device", choices=("auto", "cuda", "cpu"), default="auto")
+    parser.add_argument("--resolution", type=int, default=512, help="Evaluated at 512; multiples of 16 from 128 to 1024 are accepted")
+    return parser.parse_args()
 
 
 def main() -> None:
     metadata = run(arguments())
+    if metadata["mode"] == "prompt_seed_generation":
+        print("WARNING: text-only generation is experimental and failed the Fresh-12B release gate.")
     print(json.dumps(metadata, ensure_ascii=False, indent=2))
 
 

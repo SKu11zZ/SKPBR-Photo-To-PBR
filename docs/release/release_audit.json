@@ -1,6 +1,6 @@
 {
-  "schema": "skpbr-public-release-audit-v1",
-  "generated_utc": "2026-08-01T12:48:24.604781+00:00",
+  "schema": "skpbr-public-release-audit-v2",
+  "generated_utc": "2026-08-01T16:07:12.638000+00:00",
   "status": "passed",
   "checks": {
     "local_absolute_paths": [],
@@ -9,10 +9,10 @@
     "missing_public_example_files": [],
     "invalid_public_example_dimensions": [],
     "public_example_prompt_mismatches": [],
-    "approved_public_example_png_count": 133,
+    "approved_public_example_image_count": 135,
     "checkpoint_tensor_only": true,
-    "checkpoint_state_tensors": 104,
-    "checkpoint_parameter_count": 266241,
+    "checkpoint_state_tensors": 183,
+    "checkpoint_parameter_count": 4042230,
     "checkpoint_private_tokens": []
   },
   "excluded_private_artifact_classes": [

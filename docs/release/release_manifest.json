@@ -1,6 +1,6 @@
 {
-  "schema": "skpbr-public-release-manifest-v1",
-  "generated_utc": "2026-08-01T12:48:24.288197+00:00",
+  "schema": "skpbr-public-release-manifest-v2",
+  "generated_utc": "2026-08-01T16:07:12.172020+00:00",
   "files": [
     {
       "path": ".github/workflows/ci.yml",
@@ -13,14 +13,44 @@
       "sha256": "1694fe263835f00089711201a0b9bf5ef640cef58244caad067d030ad2949b70"
     },
     {
+      "path": "build/lib/skpbr/__init__.py",
+      "bytes": 200,
+      "sha256": "d13173a377de4647ee5288b08998665c2400b8a8588a1d0e51904f3515251471"
+    },
+    {
+      "path": "build/lib/skpbr/cli.py",
+      "bytes": 6547,
+      "sha256": "7c1eb787820d50fa18f12f44f9eb3440bb9fb76937b0de77ccde41a4750ce11b"
+    },
+    {
+      "path": "build/lib/skpbr/io.py",
+      "bytes": 6789,
+      "sha256": "c2ee4e55a7b8f72f7a8e3a0afb198f1c9edf1bbc0719ca8929c9c63215a7f857"
+    },
+    {
+      "path": "build/lib/skpbr/model.py",
+      "bytes": 15618,
+      "sha256": "851300eae4493bf315ecf249986a0a7108f7616b69d993c3d6f5f11dd191bf8e"
+    },
+    {
+      "path": "build/lib/skpbr/prompt.py",
+      "bytes": 9427,
+      "sha256": "ea36089c30350f8768e77eaba56095a47710a4b148375e25e7db62641df1ab9a"
+    },
+    {
+      "path": "build/lib/skpbr/weights/skpbr_v0_2_dualmode.pt",
+      "bytes": 16215258,
+      "sha256": "41613188fa82114b331dc22bb1449ec24b6a02975c7e67ead092ddd60aa4045b"
+    },
+    {
       "path": "CITATION.cff",
-      "bytes": 331,
-      "sha256": "2aa72039bdd65d9c4f44bbedaaaac8395def1ba6f931c8b1f952b7f87ac29a8e"
+      "bytes": 326,
+      "sha256": "dc2accb4af866b3e351b0550e8516fa05ff3e2b50c4bb861261b504fc51231dd"
     },
     {
       "path": "docs/CHANGELOG.md",
-      "bytes": 776,
-      "sha256": "a6e994a114ffca41aebb2cab0d6cec1da83a59227a71e6c7cae23ebf26ecff9b"
+      "bytes": 1541,
+      "sha256": "5c9adb06c1014deb7eaa2835c7eed792f4ba53239166409c81ebf2f72cb8783d"
     },
     {
       "path": "docs/CONTRIBUTING.md",
@@ -29,28 +59,38 @@
     },
     {
       "path": "docs/COVERAGE_AUDIT_12.md",
-      "bytes": 10564,
-      "sha256": "6b797356046888f229870b46c2faf94177f2870af67a6981013630de7ee509be"
+      "bytes": 10689,
+      "sha256": "3acf926c71571530e35c650247e3ef1803dbba8499613fd0c625520418de083b"
     },
     {
       "path": "docs/COVERAGE_AUDIT_12_zh-CN.md",
-      "bytes": 9842,
-      "sha256": "b83c5ce4e6e7ad31d0a86a6f7e829a6656408f4df23178169f813014501de782"
+      "bytes": 9975,
+      "sha256": "37b9e6f23125aef12d5c26030fbec55968d2743eddaff98f07629fa7f7497769"
     },
     {
       "path": "docs/DATA_POLICY.md",
-      "bytes": 1755,
-      "sha256": "e2dcafcf4b489a74f718aac9495b8a41a09fbd19c94ac5b0c89de206b103b3d3"
+      "bytes": 2101,
+      "sha256": "2a016f18a2d139d9fe6cbe87cbf0439c638895e7c702eb1a7b2686b98f50db3d"
+    },
+    {
+      "path": "docs/evaluation/D38_D41_metrics.json",
+      "bytes": 3889,
+      "sha256": "b7b3146344339a27d0e9356623457ecd902cde88bba2bc9893037508b8ae2740"
+    },
+    {
+      "path": "docs/evaluation/SKPBR_D38_D41_Technical_Report.html",
+      "bytes": 455080,
+      "sha256": "11a51e56e6df497fa696a218bdbc2a260c29c778cd1339b1edfb3435e5c20ad2"
     },
     {
       "path": "docs/MODEL_CARD.md",
-      "bytes": 3745,
-      "sha256": "79ad296c84c37cd758ba0c9f7a094c9ddb381ebd47bc5331242f9c51ebcf6d82"
+      "bytes": 4973,
+      "sha256": "bdbf700321b2c81f506d0d1045f4fdad0262084b1c3da6503099fd3cdf9f2e68"
     },
     {
       "path": "docs/README.md",
-      "bytes": 792,
-      "sha256": "cb511d0c26c0c80a5e5234e636ce58b0303e0c0e63d915b63709b212a4008ca8"
+      "bytes": 943,
+      "sha256": "74b14be318f2b016242ab8d5dbcc61a0da5df28afb609dcd73656fad9418ffac"
     },
     {
       "path": "docs/release/coverage_12_delivery_audit.json",
@@ -59,13 +99,13 @@
     },
     {
       "path": "docs/RELEASE_CHECKLIST.md",
-      "bytes": 1107,
-      "sha256": "4825f23a12a4e04cf7564db32faa7afdf1810fea7b492c5de60f22de6f1376c5"
+      "bytes": 1246,
+      "sha256": "7fa33355da229b7b7cb431944d2593bc675683efe9b4f8727141dc8bd8e18210"
     },
     {
       "path": "docs/REMOTE_SYNC_POLICY.md",
-      "bytes": 768,
-      "sha256": "000e377c238ce3715ce8f00e6c2d00f88c532502cc1a6a77a7b8981a35219fb3"
+      "bytes": 825,
+      "sha256": "099f584664cf733cd2f3299b6c687167877cf0589b4f600e23dc3f515812839c"
     },
     {
       "path": "docs/SECURITY.md",
@@ -759,13 +799,28 @@
     },
     {
       "path": "examples/coverage-12/README.md",
-      "bytes": 919,
-      "sha256": "1692c41d2a72d29f9b32d183e42ab3a93d0d951ed5d42915c369840a7e59ea3f"
+      "bytes": 1003,
+      "sha256": "022a83529c39c91148c9a02188378023456cc2f80ba829a1ff1127c5af3bee05"
     },
     {
       "path": "examples/coverage-12/README_zh-CN.md",
-      "bytes": 898,
-      "sha256": "aecfe8ec9f8b0ea8c314326555c95788931be172d84d4587d25828c95997e752"
+      "bytes": 978,
+      "sha256": "2514950f75428cd3d1335f5555dbf492038485eec48226fd34ba05cab8f86d8f"
+    },
+    {
+      "path": "examples/plane-d41/fresh12b_contact_sheet.jpg",
+      "bytes": 1255856,
+      "sha256": "d21f610ccd2be2657e3e579d37582e0756268caa1d5d534ad054ee1a770bc332"
+    },
+    {
+      "path": "examples/plane-d41/README.md",
+      "bytes": 1381,
+      "sha256": "522bc900291a73657308a3f1efbda5a5bf09dceba7ff1a48383f959f2113f04c"
+    },
+    {
+      "path": "examples/plane-d41/same_material_color_b_contact_sheet.jpg",
+      "bytes": 404137,
+      "sha256": "112f1dc33379c8a7ee91567304bfb4a7b64192366f9a4c04affc6157e347b01d"
     },
     {
       "path": "examples/public/contact_sheet.png",
@@ -954,28 +1009,33 @@
     },
     {
       "path": "examples/README.md",
-      "bytes": 4902,
-      "sha256": "98035d1b49d00fcf578c0d2920a12f8d765f08a6403cfe00a6ebc708ee5a0ee9"
+      "bytes": 4814,
+      "sha256": "6079f7aabcfe92a02620183d4faed331f8b81eb75df2adaa2395468e343fee1d"
     },
     {
       "path": "examples/README_zh-CN.md",
-      "bytes": 4619,
-      "sha256": "81c99afd31f96d59099241011cd30d261aaa2f331fe0e822dcf939923a0ceed2"
+      "bytes": 4558,
+      "sha256": "978eb90b4479549411053d86c889b7fd94d9b9ae7ca6775d885caab3d6b6585d"
     },
     {
       "path": "LICENSE",
-      "bytes": 1075,
-      "sha256": "082e1c7cb79f0d60be5e24e31ea3e273f280cb12c1ec7ee688a839040a52222f"
+      "bytes": 11357,
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+    },
+    {
+      "path": "NOTICE",
+      "bytes": 94,
+      "sha256": "44c6d81330b65a2d617d5998ce07bac6bd499051318ea296302100f12fade484"
     },
     {
       "path": "pyproject.toml",
-      "bytes": 1125,
-      "sha256": "49f094bca24d726f8f4eb40150a43ee00a362d6268f4f4fd84c1ac4609616550"
+      "bytes": 1149,
+      "sha256": "cf4727dcd2a6b9ecb6a37dca32eb9753c1e4b58219cc799d7bc06fa7689f764c"
     },
     {
       "path": "README.md",
-      "bytes": 9819,
-      "sha256": "dca9bfaa7418e05351169cd973b22dfd3d38c781bf40a1980b1626d2d42aaee3"
+      "bytes": 8930,
+      "sha256": "626df6a6863e63304e45a467f7b6704fddc4d1c726ad8a4b90e4b6389812bf60"
     },
     {
       "path": "requirements.txt",
@@ -984,43 +1044,73 @@
     },
     {
       "path": "src/skpbr/__init__.py",
-      "bytes": 188,
-      "sha256": "7c601650c89eb16c5b1710d8bbc27a914775fecdf2f0e7b1d00156119ee896ac"
+      "bytes": 200,
+      "sha256": "d13173a377de4647ee5288b08998665c2400b8a8588a1d0e51904f3515251471"
     },
     {
       "path": "src/skpbr/cli.py",
-      "bytes": 8223,
-      "sha256": "338c40c46d6b0fcbb08358dbe106d3aac3998f4290da5a9e503164c8fd74b0a5"
+      "bytes": 6547,
+      "sha256": "7c1eb787820d50fa18f12f44f9eb3440bb9fb76937b0de77ccde41a4750ce11b"
     },
     {
       "path": "src/skpbr/io.py",
-      "bytes": 2913,
-      "sha256": "eee8ac6cf4370834ff3241fae33ca9dda976b67deed1f27a32bacb9e8f2f0ec3"
+      "bytes": 6789,
+      "sha256": "c2ee4e55a7b8f72f7a8e3a0afb198f1c9edf1bbc0719ca8929c9c63215a7f857"
     },
     {
       "path": "src/skpbr/model.py",
-      "bytes": 5698,
-      "sha256": "9ab26890bb9d386e541cea0ce4866dbaa9b822503d5ecba89abb960fb59d89b8"
+      "bytes": 15618,
+      "sha256": "851300eae4493bf315ecf249986a0a7108f7616b69d993c3d6f5f11dd191bf8e"
     },
     {
       "path": "src/skpbr/prompt.py",
-      "bytes": 12872,
-      "sha256": "36af70a79d7b6deb81fd9e07526b69fb547795876f03fa7fcd72a6d15699776c"
+      "bytes": 9427,
+      "sha256": "ea36089c30350f8768e77eaba56095a47710a4b148375e25e7db62641df1ab9a"
     },
     {
-      "path": "src/skpbr/weights/skpbr_v0_1_state_dict.pt",
-      "bytes": 1097405,
-      "sha256": "be8e61838941614881cfe46e90154c9c05418caf5bb4bea17b1aa89996c193d3"
+      "path": "src/skpbr/weights/skpbr_v0_2_dualmode.pt",
+      "bytes": 16215258,
+      "sha256": "41613188fa82114b331dc22bb1449ec24b6a02975c7e67ead092ddd60aa4045b"
+    },
+    {
+      "path": "src/skpbr.egg-info/dependency_links.txt",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "src/skpbr.egg-info/entry_points.txt",
+      "bytes": 41,
+      "sha256": "1e469b3b69add328bf823938910d37dce249b116066314cc4c8c5d7240b9aca1"
+    },
+    {
+      "path": "src/skpbr.egg-info/PKG-INFO",
+      "bytes": 23230,
+      "sha256": "ae2e347e83107970213185b6bd426199e8798840aace42902e97d07d7f35464a"
+    },
+    {
+      "path": "src/skpbr.egg-info/requires.txt",
+      "bytes": 34,
+      "sha256": "020525593785d1bc464f598ac8f619087ce8b45d748ab51b94cd1c91c8485092"
+    },
+    {
+      "path": "src/skpbr.egg-info/SOURCES.txt",
+      "bytes": 404,
+      "sha256": "d30ccdfb4f1da74044865b3ff259de5eb5fe3c7e15e5bfafeb2c02a9616418e1"
+    },
+    {
+      "path": "src/skpbr.egg-info/top_level.txt",
+      "bytes": 6,
+      "sha256": "e919ab2d1e7afbbf2d4f876324b109d2ddfffec9465fc12e59faf7d81eab198a"
     },
     {
       "path": "tests/test_public_contract.py",
-      "bytes": 4314,
-      "sha256": "a70af27c777d3233e944bdf8e8c1805b18394a58804c54a5d2ebc64af88a434d"
+      "bytes": 4476,
+      "sha256": "a0222cdd777dda1a59c160c135412e08a4cf394aaa92c2d7cb62d5002f73762a"
     },
     {
       "path": "tools/release_audit.py",
-      "bytes": 11640,
-      "sha256": "7c0887053aeda175ae6991fa55431bd5a10acef210f9f2310444a47883a89672"
+      "bytes": 11890,
+      "sha256": "627d9fc6c81d1ecd703fa8054f5fcbda688c3711ca226f594fbf9e644d7916d6"
     }
   ]
 }

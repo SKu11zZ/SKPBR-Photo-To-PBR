@@ -1,6 +1,6 @@
-"""Public SKPBR research-preview package."""
+"""Public SKPBR planar material research-preview package."""
 
-from .model import SKPBRBaseColorCalibrator, parameter_count
+from .model import PromptRemediatedPBRNet, parameter_count
 
-__all__ = ["SKPBRBaseColorCalibrator", "parameter_count"]
-__version__ = "0.1.0"
+__all__ = ["PromptRemediatedPBRNet", "parameter_count"]
+__version__ = "0.2.0"

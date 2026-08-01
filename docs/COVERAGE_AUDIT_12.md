@@ -1,5 +1,7 @@
 # SKPBR Current Material Coverage Audit (12 Cases)
 
+> Historical v0.1 Suzanne audit. The v0.2 planar D38-D41 result is documented in the root README and technical HTML report.
+
 **English** | [简体中文](COVERAGE_AUDIT_12_zh-CN.md)
 
 ## Executive conclusion

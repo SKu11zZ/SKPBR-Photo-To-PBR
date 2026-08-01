@@ -1,5 +1,7 @@
 # SKPBR 当前材质覆盖审计（12 类）
 
+> 这是 v0.1 Suzanne 输入协议的历史审计。v0.2 平面输入的 D38-D41 结果见根目录 README 和技术 HTML 报告。
+
 [English](COVERAGE_AUDIT_12.md) | **简体中文**
 
 ## 结论先行

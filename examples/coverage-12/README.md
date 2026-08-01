@@ -2,7 +2,7 @@
 
 **English** | [简体中文](README_zh-CN.md)
 
-This folder is an audit set, not a best-of gallery. It contains 12 new procedural inputs and the unedited outputs from the frozen research pipeline.
+This folder is the historical v0.1 Suzanne audit, not a best-of gallery. It contains 12 procedural inputs and the unedited outputs from that frozen research pipeline. The current v0.2 planar evaluation is under `examples/plane-d41`.
 
 - [Open the bilingual long sheet](contact_sheet_long.png)
 - [Read the full report](../../docs/COVERAGE_AUDIT_12.md)

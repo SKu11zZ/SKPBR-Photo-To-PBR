@@ -2,9 +2,9 @@
 
 **English** | [简体中文](README_zh-CN.md)
 
-These four examples are unedited outputs from the frozen SKPBR research pipeline. Each input was created from a new deterministic procedural recipe and rendered on Suzanne with Blender Cycles at 1024 x 1024. Inference read only the input render and the listed Prompt; it did not read source maps, training or evaluation samples, commercial assets, or a nearest-neighbor catalog.
+These are historical v0.1 Suzanne examples, kept so the earlier release remains auditable. They are not representative of the v0.2 planar input contract. Each input was created from a new deterministic procedural recipe and rendered on Suzanne with Blender Cycles at 1024 x 1024. Inference read only the input render and the listed Prompt; it did not read source maps, training or evaluation samples, commercial assets, or a nearest-neighbor catalog.
 
-The complete research pipeline generated these six-map outputs. The installable public package contains only the final S12 BaseColor calibration head and cannot reproduce the upstream parent-PBR prediction by itself.
+The old research pipeline generated these six-map outputs. The current installable v0.2 package uses a different planar six-map model; see the root README for its input contract.
 
 For the wider and much less flattering test, see the [12-material coverage audit](coverage-12/README.md).
 
@@ -85,6 +85,6 @@ Prompt: `cyan blue automotive clearcoat, glossy metallic finish`
 
 These examples are qualitative demonstrations, not accuracy claims. No post-processing or manual texture replacement was used to hide failures.
 
-## CLI input contract
+## Historical input contract
 
-To run the released calibration head, provide a controlled RGB reference, parent PBR prediction, and visible-confidence map. The parent directory must contain `basecolor.png`, `roughness.png`, `metallic.png`, `normal.png`, `height.png`, and `ao.png`. The output contains a corrected BaseColor, the five bit-identical non-color maps, and `metadata.json`.
+These files document the old v0.1 parent-PBR calibration experiment. That CLI has been replaced. The current v0.2 command accepts an aligned flat image plus Prompt, or a Prompt plus seed; use the commands in the root README.

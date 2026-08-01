@@ -2,7 +2,7 @@
 
 [English](README.md) | **简体中文**
 
-这四组示例均为冻结 SKPBR 研究管线未经美化的输出。每个输入都由全新的确定性程序化配方生成，并以 Blender Cycles 在 Suzanne 上进行 1024 x 1024 渲染。推理只读取输入渲染图和下列 Prompt，没有读取源贴图、训练/评估样本、商业素材或近邻素材库。
+这四组是保留下来的 v0.1 Suzanne 历史示例，方便继续审计旧版本；它们不代表 v0.2 的平面输入协议。每个输入都由全新的确定性程序化配方生成，并以 Blender Cycles 在 Suzanne 上进行 1024 x 1024 渲染。推理只读取输入渲染图和下列 Prompt，没有读取源贴图、训练/评估样本、商业素材或近邻素材库。
 
 完整研究管线生成了这些六贴图结果；可安装的公开包只包含最终 S12 BaseColor 校准头，无法单独完成上游父 PBR 预测。
 
@@ -85,6 +85,6 @@ Prompt：`cyan blue automotive clearcoat, glossy metallic finish`
 
 这些是定性演示，不代表精度承诺；没有使用后处理或人工替换贴图来掩盖问题。
 
-## 公开 CLI 输入约定
+## 历史输入协议
 
-运行公开校准头时，需要提供受控 RGB 参考图、父 PBR 预测和可见 UV 置信度图。父目录必须包含 `basecolor.png`、`roughness.png`、`metallic.png`、`normal.png`、`height.png` 和 `ao.png`。输出包含校准后的 BaseColor、逐文件不变的其余五张贴图和 `metadata.json`。
+这些文件记录的是旧 v0.1 父 PBR 校准实验，对应的 CLI 已经被替换。当前 v0.2 命令接受平面图片 + Prompt，或者 Prompt + Seed；请按根目录 README 的命令运行。

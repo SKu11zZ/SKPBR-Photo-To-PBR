@@ -4,167 +4,191 @@
 
 ## English
 
-SKPBR started as a small material experiment for one of my own game projects. The part released here has **266,241 parameters**. Given a controlled Suzanne/Light-Stage render, an English material Prompt, and a parent PBR prediction, it corrects the BaseColor at up to 1024px and passes Roughness, Metallic, Normal, Height, and AO through unchanged.
+SKPBR is my small attempt at turning a material reference into something you can actually plug into Blender or a game engine. The current v0.2 checkpoint has **4,042,230 parameters** and writes six 512px PBR maps:
 
-One thing should be clear up front: this is not yet a “drop in any photo and get a finished PBR material” model. The public package is the final BaseColor calibration head, not the complete private RGB-to-PBR research stack. It still needs a parent PBR input and a known visible-UV confidence map.
+- BaseColor
+- Roughness
+- Metallic
+- OpenGL +Y Normal
+- Height
+- AO
 
-### Where it works today
+There are now two inputs:
 
-The current model is useful when the setup is controlled:
+1. **Flat image + text** — reconstruct the visible material patch. This is the useful path today.
+2. **Text + seed** — generate a repeatable material candidate. This path runs, but it is still experimental.
 
-- one Suzanne render using the known camera, UV layout, and Light-Stage-style lighting;
-- one short English Prompt such as `dark rough cast iron`;
-- six parent PBR maps: BaseColor, Roughness, Metallic, Normal, Height, and AO;
-- one visible-confidence map for the projected UV region.
+I'll say the awkward part first: this is not yet a general “one phone photo in, production material out” system. The image path expects an aligned, fairly flat material crop with manageable lighting. Text-only generation failed its final release gate, so please treat those results as starting points rather than ground truth.
 
-It produces a corrected BaseColor. The other five maps are copied bit-for-bit, so the head cannot quietly change geometry detail or surface response behind your back. The result is tied to the known UV layout; it is not guaranteed to tile cleanly on another mesh.
+### What the latest blind test looks like
 
-### Twelve broader material types
+This sheet contains twelve procedural materials generated only after the weights were frozen. Each row compares the input-side target with the current result. It is deliberately not a cherry-picked beauty reel.
 
-This second run was meant to find the boundary, not to make the model look good. Blue glazed ceramic and red brick came out relatively close. Oxidized copper, cork, and denim caught only part of the material. Brushed aluminum, powder-coated steel, black ABS, granite, concrete, carbon fiber, and leather all had obvious identity or color failures.
+![SKPBR D41 twelve-material frozen evaluation](examples/plane-d41/fresh12b_contact_sheet.jpg)
 
-So the 73 active material families in the research directory should not be read as 73 materials the model can already reconstruct reliably. Sand is still reference-only and is not included here.
+The image-plus-text path is already useful for metals, coatings, concrete, ceramic, and several stone-like surfaces. Dark leather, denim, cork, brick roughness, and some ABS finishes still need work. The same-material color test passed red, blue, and orange, but missed white; [the four-color sheet is here](examples/plane-d41/same_material_color_b_contact_sheet.jpg).
 
-![SKPBR 12-material bilingual coverage audit](examples/coverage-12/contact_sheet_long.png)
+### Numbers worth knowing
 
-[Read the full report and per-channel numbers.](docs/COVERAGE_AUDIT_12.md) The full-resolution input, output render, and six maps for every case are under [examples/coverage-12](examples/coverage-12/README.md).
+| Check | Result | Status |
+|---|---:|---|
+| Parameters | 4,042,230 | — |
+| Frozen D10 BaseColor MAE | 0.04967 | pass, ceiling 0.10 |
+| Frozen D10 Roughness MAE | 0.06145 | pass |
+| Frozen D10 Metallic MAE | 0.00455 | pass |
+| Frozen D10 Normal error | 13.68° | pass |
+| Frozen D10 rerender MAE | 0.03702 | pass |
+| Catastrophic metal/non-metal swaps | 0 | pass |
+| Fresh-12B combined identities | 6 / 12 | fail, required 8 |
+| Same material, four colors | 3 / 4 | white failed |
+| Peak training VRAM estimate | 5.07 GiB | below the 8 GiB cap |
 
-### Running the public head
+The D10 set contains 81 held-out examples. Fresh-12B is a second one-shot suite created after the Prompt adapter was frozen; it was not used for another tuning round. The complete methodology and per-material table are in the [D38-D41 technical report](docs/evaluation/SKPBR_D38_D41_Technical_Report.html).
+
+### Install
+
+Python 3.10+ and PyTorch 2.2+ are expected.
 
 ```bash
 python -m venv .venv
 python -m pip install -e .
 ```
 
-The parent directory must contain `basecolor.png`, `roughness.png`, `metallic.png`, `normal.png`, `height.png`, and `ao.png`.
+### Image + text reconstruction
 
 ```bash
 skpbr \
-  --image reference.png \
-  --prompt "dark rough cast iron" \
-  --parent-dir parent_pbr \
-  --visible-confidence visible_confidence.png \
-  --output outputs/cast_iron
+  --image material.png \
+  --prompt "weathered gray concrete with pores, rough dry finish" \
+  --output outputs/concrete
 ```
 
-The command refuses to overwrite an existing output directory. CPU and CUDA inference are both supported through `--device cpu`, `--device cuda`, or the default `--device auto`.
+### Text-only candidate generation
 
-### The numbers, without dressing them up
+```bash
+skpbr \
+  --prompt "oxidized copper with irregular green patina" \
+  --seed 42 \
+  --output outputs/copper_candidate
+```
 
-The frozen external shadow contained 81 examples from 59 source-disjoint identities. SKPBR improved BaseColor MAE over the uncalibrated parent by about **53.3%**, but it was still **22.9% worse** than the stronger frozen D36 color baseline. It passed 8 of 11 release gates, so v0.1 remains a research preview.
+The command refuses to overwrite a non-empty directory. It writes `preview.png`, `inference_manifest.json`, and six images under `maps/`. CPU and CUDA are supported through `--device auto`, `--device cpu`, or `--device cuda`.
 
-| Metric | Result |
-|---|---:|
-| Parent BaseColor MAE | 0.19143 |
-| Frozen D36 BaseColor MAE | 0.07272 |
-| SKPBR BaseColor MAE | 0.08935 |
-| Item non-regression rate | 92.59% — fail |
-| Catastrophic item rate | 4.94% — fail |
-| Screen-substitution consistency MAE | 0.0 — pass |
-| Parent-detail correlation | 0.96742 — pass |
-| Development/shadow identity overlap | 0 — pass |
-
-No weight, threshold, or published metric was changed after that one-shot evaluation.
+The model is fully convolutional, but **512px is the evaluated release resolution**. Other multiples of 16 from 128 to 1024 are exposed for experiments, not as a quality promise.
 
 ### Current boundary
 
-The main unresolved problem is color: the final head is deliberately very stable under lighting changes, but that stability also makes it throw away some useful evidence from the input image. Fine, high-density patterns such as marble veins, patina, and irregular gravel structure are also weaker than they should be.
+Supported as a research preview:
 
-The model has not been validated for arbitrary phone photos, arbitrary geometry, unknown cameras, unknown UVs, SSS, transmission, opacity, hair, skin, fluids, or volumetric materials. If your use case depends on any of those, assume it is unsupported until it is tested.
+- aligned planar RGB material crops;
+- English or Chinese material descriptions;
+- common non-SSS metals, coatings, stones, concrete, masonry, ceramic, composites, cork, leather, and textiles;
+- deterministic text-only variations through an integer seed.
 
-### What is actually published
+Not established yet:
 
-The repository contains the small inference package, a tensor-only checkpoint, tests, four focused examples, the 12-material coverage audit, and aggregate evaluation numbers. It does not contain training/evaluation images, private source PBR maps, commercial material assets, caches, optimizer states, local paths, sample identities, or nearest-neighbor catalogs.
+- arbitrary phone photos with unknown lighting, perspective, exposure, or occlusion;
+- hidden or unseen UV recovery;
+- transparency, subsurface scattering, hair, skin, liquids, or volumes;
+- physically measured absolute reflectance;
+- reliable text-only material identity across all covered classes.
 
-The more formal material is kept out of the front page: [model card](docs/MODEL_CARD.md), [data policy](docs/DATA_POLICY.md), [release checklist](docs/RELEASE_CHECKLIST.md), and [documentation index](docs/README.md).
+### What is published
+
+The repository contains inference code, the frozen v0.2 checkpoint, tests, the twelve-material blind sheet, aggregate evaluation evidence, and the previous v0.1 historical audit. It does **not** contain commercial material assets, source PBR libraries, training images, private caches, optimizer states, sample identities, or nearest-neighbor catalogs.
 
 ### License
 
-Repository-authored code and the exported SKPBR weight file are released under the [MIT License](LICENSE). MIT does not grant redistribution rights for third-party source assets; none of those assets are included here.
-
-<p align="right"><a href="#skpbr">Back to top</a></p>
-
----
+Repository-authored code and the exported SKPBR checkpoint are released under the [Apache License 2.0](LICENSE). That license does not grant redistribution rights for third-party source assets; none of those assets are included here.
 
 ## 简体中文
 
-SKPBR 是我给自己的一个游戏项目做的材质实验。现在公开的这部分一共 **266,241 个参数**：输入一张受控的 Suzanne/Light-Stage 渲染图、一句英文材质 Prompt 和一套父 PBR，它负责把 BaseColor 校准到最高 1024px；Roughness、Metallic、Normal、Height 和 AO 则原样保留。
+SKPBR 是我把材质参考图变成 Blender 或游戏引擎里能直接用的 PBR 贴图的一次小实验。现在的 v0.2 模型有 **4,042,230 个参数**，会输出六张 512px 贴图：BaseColor、Roughness、Metallic、OpenGL +Y Normal、Height 和 AO。
 
-先把话说在前面：它还不是“随手扔一张照片进去，就能自动吐出完整 PBR”的模型。GitHub 里放出来的是最后的 BaseColor 校准头，不是私有研究管线的全部上游。当前公开版仍然需要父 PBR 和已知 UV 的可见置信度图。
+这一版支持两种输入：
 
-### 它现在能干什么
+1. **平面图片 + 文字**：重建图片里可见的材质。这是目前真正能用的主路径。
+2. **只输入文字 + Seed**：生成一套可以复现的材质候选。它已经能跑，但仍然属于实验功能。
 
-在输入条件受控时，它可以完成下面这件事：
+先把不好听的话说在前面：它还不是“随便拍张手机照片就能得到生产级材质”的系统。图片最好是对齐、比较平整、光照可控的材质局部。纯文字生成也没有通过最后一道发布门槛，所以更适合拿来做起点，不适合当成标准答案。
 
-- 输入一张固定相机、固定 UV、Light-Stage 风格光照下的 Suzanne 渲染图；
-- 再给一句类似 `dark rough cast iron` 的英文描述；
-- 提供 BaseColor、Roughness、Metallic、Normal、Height、AO 六张父 PBR；
-- 提供可见 UV 区域的置信度图；
-- 输出一张校准后的 BaseColor，其余五张贴图逐文件不变。
+### 最新一轮盲测
 
-这样做的好处是校准头不会顺手篡改表面细节；代价是它只能处理已知 UV 下的结果，不能保证贴到别的模型上仍然无缝。
+下面是权重冻结后才生成的 12 种程序化材质。每一行都在比较输入侧目标和当前输出，没有特意只挑好看的结果。
 
-### 12 类材质覆盖测试
+![SKPBR D41 十二材质冻结评估](examples/plane-d41/fresh12b_contact_sheet.jpg)
 
-这一轮不是为了挑最好看的结果，而是想看看边界到底在哪。蓝色釉面陶瓷和红砖相对接近；氧化铜、软木和牛仔布只抓到一部分；拉丝铝、粉末涂层钢、黑色 ABS、花岗岩、混凝土、碳纤维和皮革都有明显的材质身份或颜色失败。
+目前图像 + 文字模式在金属、涂层、混凝土、陶瓷和一部分石材上已经有使用价值。深色皮革、牛仔布、软木、红砖 Roughness 和部分 ABS 表面仍然比较弱。同材质异色测试中红、蓝、橙通过，白色失败；[四色对比图在这里](examples/plane-d41/same_material_color_b_contact_sheet.jpg)。
 
-所以研究目录里的 73 个活跃家族，不能理解成模型已经可靠支持 73 类材质。沙子目前仍然是 `reference_only`，这次没有把它硬算成会做。
+### 几个关键数字
 
-![SKPBR 12 类材质中英双语覆盖测试](examples/coverage-12/contact_sheet_long.png)
+| 检查项 | 结果 | 状态 |
+|---|---:|---|
+| 参数量 | 4,042,230 | — |
+| 冻结 D10 BaseColor MAE | 0.04967 | 通过，上限 0.10 |
+| 冻结 D10 Roughness MAE | 0.06145 | 通过 |
+| 冻结 D10 Metallic MAE | 0.00455 | 通过 |
+| 冻结 D10 Normal 角度误差 | 13.68° | 通过 |
+| 冻结 D10 重渲染 MAE | 0.03702 | 通过 |
+| 金属/非金属灾难性互换 | 0 | 通过 |
+| Fresh-12B 综合身份通过数 | 6 / 12 | 未通过，要求 8 |
+| 同材质四色 | 3 / 4 | 白色失败 |
+| 训练峰值显存估算 | 5.07 GiB | 低于 8 GiB 限制 |
 
-[完整分析和逐通道数字在这里。](docs/COVERAGE_AUDIT_12_zh-CN.md) 每项 1024px 输入、输出渲染和六张贴图都放在 [examples/coverage-12](examples/coverage-12/README_zh-CN.md)。
+D10 是 81 个冻结测试样本。Fresh-12B 是 Prompt 适配器冻结后才生成的第二套一次性测试，失败后没有继续拿它调参。完整方法和逐材质数据见 [D38-D41 技术报告](docs/evaluation/SKPBR_D38_D41_Technical_Report.html)。
 
-### 怎么跑
+### 安装
+
+需要 Python 3.10+ 和 PyTorch 2.2+。
 
 ```bash
 python -m venv .venv
 python -m pip install -e .
 ```
 
-父 PBR 文件夹需要包含 `basecolor.png`、`roughness.png`、`metallic.png`、`normal.png`、`height.png` 和 `ao.png`。
+### 图片 + 文字重建
 
 ```bash
 skpbr \
-  --image reference.png \
-  --prompt "dark rough cast iron" \
-  --parent-dir parent_pbr \
-  --visible-confidence visible_confidence.png \
-  --output outputs/cast_iron
+  --image material.png \
+  --prompt "带孔洞的风化灰色混凝土，干燥粗糙表面" \
+  --output outputs/concrete
 ```
 
-CLI 默认不会覆盖已有输出目录。推理可以用 CPU，也可以通过 `--device cuda` 使用显卡。
+### 纯文字候选生成
 
-### 成绩就直接说
+```bash
+skpbr \
+  --prompt "带不规则绿色铜锈的氧化铜" \
+  --seed 42 \
+  --output outputs/copper_candidate
+```
 
-一次性冻结外部盲测共有 81 个样本，来自 59 个与开发集不重叠的材质身份。SKPBR 相比未校准父输出把 BaseColor MAE 降低了约 **53.3%**，但仍然比更强的冻结 D36 颜色基线差 **22.9%**。11 个发布门槛里通过了 8 个，所以 v0.1 只能算研究预览版。
+程序不会覆盖非空目录。输出包括 `preview.png`、`inference_manifest.json`，以及 `maps/` 目录里的六张贴图。可以使用 `--device auto`、`--device cpu` 或 `--device cuda`。
 
-| 指标 | 结果 |
-|---|---:|
-| 未校准父输出 BaseColor MAE | 0.19143 |
-| 冻结 D36 BaseColor MAE | 0.07272 |
-| SKPBR BaseColor MAE | 0.08935 |
-| 单项不退化率 | 92.59%——未通过 |
-| 灾难性样本率 | 4.94%——未通过 |
-| 屏幕替换一致性 MAE | 0.0——通过 |
-| 父输出高频细节相关性 | 0.96742——通过 |
-| 开发集/盲测身份重叠 | 0——通过 |
+模型本身是全卷积结构，但**这一版正式评估的分辨率是 512px**。命令行允许实验 128 到 1024 之间、能被 16 整除的分辨率，但这不代表它们已经达到同样的质量。
 
-这次一次性评估结束后，没有为了让数字好看再改权重、阈值或已公布指标。
+### 当前能力边界
 
-### 目前最大的短板
+目前可以作为研究预览使用的范围：
 
-最明显的问题还是颜色。最终校准头为了抵抗光照变化做得比较保守，但保守过头以后，也会把输入图里本来有用的颜色证据一起丢掉。大理石细脉、铜锈和不规则砾石这类高信息密度纹理，目前也还原得不够好。
+- 对齐的平面 RGB 材质局部；
+- 中英文材质描述；
+- 常见非 SSS 金属、涂层、石材、混凝土、砖石、陶瓷、复合材料、软木、皮革和织物；
+- 通过整数 Seed 复现纯文字候选。
 
-任意手机照片、任意模型、未知相机、未知 UV，以及 SSS、透明、毛发、皮肤、流体和体积材质，都不在当前已验证范围内。没有测过的能力，这里就不先吹成支持。
+尚未证明的范围：
 
-### 仓库里到底放了什么
+- 未知光照、透视、曝光或遮挡下的任意手机照片；
+- 不可见 UV 区域的恢复；
+- 透明、次表面散射、毛发、皮肤、液体和体积材质；
+- 绝对物理反射率测量；
+- 在所有已覆盖类别上都可靠的纯文字材质生成。
 
-仓库里有可独立运行的小型校准包、纯张量权重、测试、四组重点示例、12 类覆盖审计和聚合评估数据。训练/评估图片、私有原始 PBR、商业材质、缓存、优化器状态、本机路径、逐样本身份和近邻素材库都没有上传。
+### 仓库里有什么
 
-模型卡、数据政策、发布审计等偏学术和工程的内容统一放在 [文档目录](docs/README.md)，首页不再堆一排说明文件。
+仓库包含推理代码、冻结的 v0.2 权重、测试、12 材质盲测图、汇总评估数据，以及 v0.1 的历史审计。仓库不包含商业材质资产、源 PBR 库、训练图片、私有缓存、优化器状态、样本身份或近邻检索目录。
 
-### License
+### 许可证
 
-仓库代码和导出的 SKPBR 权重使用 [MIT License](LICENSE)。MIT 不会自动授予第三方原始素材的再分发权；这类素材没有放进仓库。
-
-<p align="right"><a href="#skpbr">返回顶部</a></p>
+仓库自行创作的代码和导出的 SKPBR 权重使用 [Apache License 2.0](LICENSE)。这个许可证不会自动授予第三方源素材的再分发权；这类素材没有放进仓库。

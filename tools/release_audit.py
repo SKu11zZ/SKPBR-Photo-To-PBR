@@ -15,12 +15,13 @@ from PIL import Image
 
 
 ROOT = Path(__file__).resolve().parents[1]
-CHECKPOINT = ROOT / "src" / "skpbr" / "weights" / "skpbr_v0_1_state_dict.pt"
+CHECKPOINT = ROOT / "src" / "skpbr" / "weights" / "skpbr_v0_2_dualmode.pt"
 RELEASE_OUTPUT_DIR = ROOT / "docs" / "release"
 TEXT_SUFFIXES = {
     ".cff",
     ".gitignore",
     ".json",
+    ".html",
     ".md",
     ".py",
     ".toml",
@@ -113,10 +114,12 @@ PUBLIC_SHEET_DIMENSIONS = {
     "examples/coverage-12/contact_sheet_part_01.png": (2160, 1770),
     "examples/coverage-12/contact_sheet_part_02.png": (2160, 1620),
     "examples/coverage-12/contact_sheet_part_03.png": (2160, 1650),
+    "examples/plane-d41/fresh12b_contact_sheet.jpg": (1680, 4190),
+    "examples/plane-d41/same_material_color_b_contact_sheet.jpg": (1680, 1470),
 }
-ALLOWED_PUBLIC_PNGS = set(PUBLIC_SHEET_DIMENSIONS)
+ALLOWED_PUBLIC_IMAGES = set(PUBLIC_SHEET_DIMENSIONS)
 for _slug in PUBLIC_EXAMPLE_PROMPTS:
-    ALLOWED_PUBLIC_PNGS.update(
+    ALLOWED_PUBLIC_IMAGES.update(
         {
             f"examples/public/{_slug}/input.png",
             f"examples/public/{_slug}/output_render.png",
@@ -124,7 +127,7 @@ for _slug in PUBLIC_EXAMPLE_PROMPTS:
         }
     )
 for _slug in COVERAGE_EXAMPLES:
-    ALLOWED_PUBLIC_PNGS.update(
+    ALLOWED_PUBLIC_IMAGES.update(
         {
             f"examples/coverage-12/materials/{_slug}/input.png",
             f"examples/coverage-12/materials/{_slug}/output_render.png",
@@ -166,10 +169,10 @@ def audit() -> tuple[dict[str, object], dict[str, object]]:
         relative = path.relative_to(ROOT).as_posix()
         if (
             path.suffix.casefold() in FORBIDDEN_ASSET_SUFFIXES
-            and relative not in ALLOWED_PUBLIC_PNGS
+            and relative not in ALLOWED_PUBLIC_IMAGES
         ):
             forbidden_assets.append(relative)
-        if relative in ALLOWED_PUBLIC_PNGS:
+        if relative in ALLOWED_PUBLIC_IMAGES:
             expected_dimensions = PUBLIC_SHEET_DIMENSIONS.get(relative, (1024, 1024))
             with Image.open(path) as image:
                 if image.size != expected_dimensions:
@@ -188,7 +191,7 @@ def audit() -> tuple[dict[str, object], dict[str, object]]:
                 if token.casefold() in value.casefold():
                     private_token_hits.append({"file": relative, "token": token})
     missing_public_example_files = sorted(
-        ALLOWED_PUBLIC_PNGS.difference(relative_files)
+        ALLOWED_PUBLIC_IMAGES.difference(relative_files)
     )
     prompt_mismatches = []
     for slug, expected in PUBLIC_EXAMPLE_PROMPTS.items():
@@ -225,10 +228,11 @@ def audit() -> tuple[dict[str, object], dict[str, object]]:
             )
     if not CHECKPOINT.is_file():
         raise FileNotFoundError(CHECKPOINT)
-    state = torch.load(CHECKPOINT, map_location="cpu", weights_only=True)
+    payload = torch.load(CHECKPOINT, map_location="cpu", weights_only=True)
+    state = payload.get("model") if isinstance(payload, dict) else None
     checkpoint_tensor_only = (
         isinstance(state, dict)
-        and len(state) == 104
+        and len(state) == 183
         and all(isinstance(key, str) for key in state)
         and all(torch.is_tensor(value) for value in state.values())
     )
@@ -247,11 +251,11 @@ def audit() -> tuple[dict[str, object], dict[str, object]]:
         and not invalid_example_dimensions
         and not prompt_mismatches
         and checkpoint_tensor_only
-        and parameter_count == 266_241
+        and parameter_count == 4_042_230
         and not checkpoint_private_hits
     )
     manifest = {
-        "schema": "skpbr-public-release-manifest-v1",
+        "schema": "skpbr-public-release-manifest-v2",
         "generated_utc": datetime.now(timezone.utc).isoformat(),
         "files": [
             {
@@ -263,7 +267,7 @@ def audit() -> tuple[dict[str, object], dict[str, object]]:
         ],
     }
     report = {
-        "schema": "skpbr-public-release-audit-v1",
+        "schema": "skpbr-public-release-audit-v2",
         "generated_utc": datetime.now(timezone.utc).isoformat(),
         "status": "passed" if passed else "failed",
         "checks": {
@@ -273,7 +277,7 @@ def audit() -> tuple[dict[str, object], dict[str, object]]:
             "missing_public_example_files": missing_public_example_files,
             "invalid_public_example_dimensions": invalid_example_dimensions,
             "public_example_prompt_mismatches": prompt_mismatches,
-            "approved_public_example_png_count": len(ALLOWED_PUBLIC_PNGS),
+            "approved_public_example_image_count": len(ALLOWED_PUBLIC_IMAGES),
             "checkpoint_tensor_only": checkpoint_tensor_only,
             "checkpoint_state_tensors": len(state) if isinstance(state, dict) else 0,
             "checkpoint_parameter_count": parameter_count,
