@@ -16,7 +16,7 @@ from PIL import Image
 
 
 ROOT = Path(__file__).resolve().parents[1]
-CHECKPOINT = ROOT / "src" / "skpbr" / "weights" / "skpbr_v0_2_dualmode.pt"
+CHECKPOINT = ROOT / "src" / "skpbr" / "weights" / "skpbr_v0_3_structured_relief.pt"
 TEXT_SUFFIXES = {
     ".cff",
     ".gitignore",
@@ -53,6 +53,7 @@ INTERNAL_TOKENS = (
 PUBLIC_IMAGE_DIMENSIONS = {
     "examples/plane-d41/fresh12b_contact_sheet.jpg": (1680, 4190),
     "examples/plane-d41/same_material_color_b_contact_sheet.jpg": (1680, 1470),
+    "examples/blind-f/skpbr_blind_f_showcase_side_by_side.jpg": (3424, 8370),
 }
 ALLOWED_PUBLIC_IMAGES = set(PUBLIC_IMAGE_DIMENSIONS)
 
@@ -120,11 +121,12 @@ def audit() -> tuple[dict[str, object], dict[str, object]]:
     state = payload.get("model") if isinstance(payload, dict) else None
     checkpoint_tensor_only = (
         isinstance(state, dict)
-        and len(state) == 183
+        and len(state) == 312
         and all(isinstance(key, str) for key in state)
         and all(torch.is_tensor(value) for value in state.values())
     )
-    parameter_count = sum(int(value.numel()) for value in state.values())
+    state_tensor_elements = sum(int(value.numel()) for value in state.values())
+    parameter_count = int(payload.get("parameter_count", -1))
     checkpoint_bytes = CHECKPOINT.read_bytes()
     checkpoint_private_hits = [
         token
@@ -138,11 +140,12 @@ def audit() -> tuple[dict[str, object], dict[str, object]]:
         and not missing_public_example_files
         and not invalid_example_dimensions
         and checkpoint_tensor_only
-        and parameter_count == 4_042_230
+        and state_tensor_elements == 4_443_264
+        and parameter_count == 4_443_261
         and not checkpoint_private_hits
     )
     manifest = {
-        "schema": "skpbr-public-release-manifest-v2",
+        "schema": "skpbr-public-release-manifest-v3",
         "generated_utc": datetime.now(timezone.utc).isoformat(),
         "files": [
             {
@@ -154,7 +157,7 @@ def audit() -> tuple[dict[str, object], dict[str, object]]:
         ],
     }
     report = {
-        "schema": "skpbr-public-release-audit-v2",
+        "schema": "skpbr-public-release-audit-v3",
         "generated_utc": datetime.now(timezone.utc).isoformat(),
         "status": "passed" if passed else "failed",
         "checks": {
@@ -166,6 +169,7 @@ def audit() -> tuple[dict[str, object], dict[str, object]]:
             "approved_public_example_image_count": len(ALLOWED_PUBLIC_IMAGES),
             "checkpoint_tensor_only": checkpoint_tensor_only,
             "checkpoint_state_tensors": len(state) if isinstance(state, dict) else 0,
+            "checkpoint_state_tensor_elements": state_tensor_elements,
             "checkpoint_parameter_count": parameter_count,
             "checkpoint_private_tokens": checkpoint_private_hits,
         },

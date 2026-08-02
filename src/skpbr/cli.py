@@ -11,7 +11,6 @@ import torch
 
 from .io import (
     load_rgb,
-    periodic_seed_field,
     render_plane,
     save_json,
     save_map_set,
@@ -19,18 +18,18 @@ from .io import (
     sha256,
 )
 from .model import (
-    PromptRemediatedPBRNet,
+    StructuredReliefSpatialPBRNet,
+    isotropic_multiscale_seed_field,
     parameter_manifest,
-    rich_periodic_seed_field,
 )
 from .prompt import parse_prompt
 
 
-DEFAULT_CHECKPOINT_SHA256 = "41613188fa82114b331dc22bb1449ec24b6a02975c7e67ead092ddd60aa4045b"
+DEFAULT_CHECKPOINT_SHA256 = "cd8611c0e721c0c917e9edba07a74256ed6ba68f047a681bdf11327924d4e970"
 
 
 def default_checkpoint() -> str:
-    return str(Path(__file__).resolve().parent / "weights" / "skpbr_v0_2_dualmode.pt")
+    return str(Path(__file__).resolve().parent / "weights" / "skpbr_v0_3_structured_relief.pt")
 
 
 def resolve_device(requested: str) -> torch.device:
@@ -41,7 +40,7 @@ def resolve_device(requested: str) -> torch.device:
     return torch.device(requested)
 
 
-def load_model(checkpoint: Path, device: torch.device) -> tuple[PromptRemediatedPBRNet, dict[str, object]]:
+def load_model(checkpoint: Path, device: torch.device) -> tuple[StructuredReliefSpatialPBRNet, dict[str, object]]:
     if not checkpoint.is_file():
         raise FileNotFoundError(checkpoint)
     digest = sha256(checkpoint)
@@ -49,9 +48,10 @@ def load_model(checkpoint: Path, device: torch.device) -> tuple[PromptRemediated
         raise RuntimeError("Bundled checkpoint SHA-256 mismatch")
     payload = torch.load(checkpoint, map_location="cpu", weights_only=True)
     if not isinstance(payload, dict) or not isinstance(payload.get("model"), dict):
-        raise RuntimeError("Expected a tensor-only SKPBR v0.2 checkpoint payload")
-    model = PromptRemediatedPBRNet()
+        raise RuntimeError("Expected a tensor-only SKPBR v0.3 checkpoint payload")
+    model = StructuredReliefSpatialPBRNet()
     model.load_state_dict(payload["model"], strict=True)
+    model.requires_grad_(False)
     return model.to(device).eval(), payload
 
 
@@ -68,6 +68,7 @@ def run(options: argparse.Namespace) -> dict[str, object]:
     model, payload = load_model(checkpoint, device)
     parsed = parse_prompt(str(options.prompt))
     condition = torch.from_numpy(parsed["condition"]).unsqueeze(0).to(device)
+    attributes = torch.from_numpy(parsed["attributes"]).unsqueeze(0).to(device)
     seed = torch.tensor([int(options.seed)], dtype=torch.long, device=device)
     image_path = Path(options.image) if getattr(options, "image", None) else None
 
@@ -81,21 +82,21 @@ def run(options: argparse.Namespace) -> dict[str, object]:
         mode = "prompt_seed_generation"
         image = torch.zeros((1, 3, resolution, resolution), device=device)
         presence = torch.zeros((1, 1, resolution, resolution), device=device)
-        seed_field = periodic_seed_field(seed, resolution, resolution, channels=6)
-        rich_seed = rich_periodic_seed_field(seed, resolution, resolution)
+        rich_seed = isotropic_multiscale_seed_field(seed, resolution, resolution)
+        seed_field = rich_seed[:, :6]
 
     with torch.autocast(
         device_type=device.type,
         dtype=torch.float16,
         enabled=device.type == "cuda",
     ):
-        maps = model(image, presence, condition, seed_field, rich_seed)["maps"][0]
+        maps = model(image, presence, condition, seed_field, rich_seed, attributes)["maps"][0]
 
     output.mkdir(parents=True, exist_ok=True)
     save_map_set(output / "maps", maps)
     save_preview(output / "preview.png", render_plane(maps.unsqueeze(0), variant=0)[0])
     metadata: dict[str, object] = {
-        "schema": "skpbr-v0.2-dualmode-inference",
+        "schema": "skpbr-v0.3-structured-relief-inference",
         "created_utc": datetime.now(timezone.utc).isoformat(),
         "mode": mode,
         "mode_semantics": (
@@ -107,19 +108,21 @@ def run(options: argparse.Namespace) -> dict[str, object]:
         "parsed_prompt": {
             "material_class": parsed["material_class"],
             "physical_regime": parsed["physical_regime"],
-            "color": parsed["color"],
+            "base_color": parsed["base_color"],
+            "secondary_color": parsed["secondary_color"],
             "finish": parsed["finish"],
+            "relief": parsed["relief"],
         },
         "seed": int(options.seed) if image_path is None else None,
         "resolution": [resolution, resolution],
         "maps": ["BaseColor", "Roughness", "Metallic", "Normal OpenGL +Y", "Height", "AO"],
         "model": parameter_manifest(model),
         "checkpoint_sha256": sha256(checkpoint),
-        "checkpoint_epoch": payload.get("epoch"),
+        "checkpoint_epoch": payload.get("selected_epoch", payload.get("epoch")),
         "target_or_library_asset_reads": 0,
         "known_status": {
-            "image_prompt_mode": "MVP research preview; frozen D10 gates passed, but dark leather and denim remain weak",
-            "prompt_only_mode": "experimental; the final Fresh-12B identity gate failed at 6/12",
+            "image_prompt_mode": "research preview; Blind-F failed BaseColor, micro-normal and color-to-geometry leakage gates",
+            "prompt_only_mode": "experimental; Blind-F material identity passed 2/12",
             "resolution": "512 px is the evaluated release resolution",
         },
     }
@@ -144,7 +147,7 @@ def arguments() -> argparse.Namespace:
 def main() -> None:
     metadata = run(arguments())
     if metadata["mode"] == "prompt_seed_generation":
-        print("WARNING: text-only generation is experimental and failed the Fresh-12B release gate.")
+        print("WARNING: text-only generation is experimental and passed only 2/12 Blind-F material identities.")
     print(json.dumps(metadata, ensure_ascii=False, indent=2))
 
 

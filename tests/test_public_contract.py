@@ -11,9 +11,9 @@ from PIL import Image
 import torch
 
 from skpbr.cli import default_checkpoint, load_model, run
-from skpbr.io import MAP_FILES, periodic_seed_field
-from skpbr.model import parameter_count, rich_periodic_seed_field
-from skpbr.prompt import CONDITION_DIM, parse_prompt
+from skpbr.io import MAP_FILES
+from skpbr.model import isotropic_multiscale_seed_field, parameter_count
+from skpbr.prompt import ATTRIBUTE_DIM, CONDITION_DIM, parse_prompt
 
 
 class PublicContractTest(unittest.TestCase):
@@ -24,10 +24,13 @@ class PublicContractTest(unittest.TestCase):
 
     def test_bilingual_prompt_contract(self) -> None:
         self.assertEqual(CONDITION_DIM, 93)
+        self.assertEqual(ATTRIBUTE_DIM, 55)
         cases = {
             "brushed aluminum, satin finish": ("bare_metal", "conductor"),
             "生锈的铜，带绿色铜锈，粗糙表面": ("rusted_metal", "mixed"),
             "蓝色汽车金属漆，亮光表面": ("automotive_paint", "coated_conductor"),
+            "酒红色 ABS，哑光表面和很低凹凸": ("plastic_rubber", "dielectric"),
+            "深色大理石，带细金纹和近乎平面": ("marble", "dielectric"),
         }
         for prompt, expected in cases.items():
             parsed = parse_prompt(prompt)
@@ -35,45 +38,68 @@ class PublicContractTest(unittest.TestCase):
             self.assertEqual((parsed["material_class"], parsed["physical_regime"]), expected)
             self.assertIsInstance(condition, np.ndarray)
             self.assertEqual(condition.shape, (93,))
+            self.assertEqual(parsed["attributes"].shape, (55,))
             self.assertEqual(condition.dtype, np.float32)
             self.assertTrue(np.isfinite(condition).all())
 
     def test_checkpoint_contract(self) -> None:
         state = self.payload["model"]
-        self.assertEqual(sum(tensor.numel() for tensor in state.values()), 4_042_230)
+        self.assertEqual(len(state), 312)
+        self.assertEqual(sum(tensor.numel() for tensor in state.values()), 4_443_264)
+        self.assertEqual(self.payload["parameter_count"], 4_443_261)
         self.assertTrue(all(isinstance(key, str) for key in state))
         self.assertTrue(all(torch.is_tensor(value) for value in state.values()))
-        self.assertEqual(parameter_count(self.model), 4_042_230)
+        self.assertEqual(parameter_count(self.model), 4_443_261)
 
     @torch.inference_mode()
     def test_image_and_text_only_forward(self) -> None:
         size = 64
-        condition = torch.from_numpy(parse_prompt("rough gray concrete with pores")["condition"])[None]
+        parsed = parse_prompt("rough gray concrete with pores")
+        condition = torch.from_numpy(parsed["condition"])[None]
+        attributes = torch.from_numpy(parsed["attributes"])[None]
         image = torch.rand(1, 3, size, size)
         present = torch.ones(1, 1, size, size)
         zeros6 = torch.zeros(1, 6, size, size)
         zeros12 = torch.zeros(1, 12, size, size)
-        reconstructed = self.model(image, present, condition, zeros6, zeros12)["maps"]
+        reconstructed = self.model(
+            image, present, condition, zeros6, zeros12, attributes
+        )["maps"]
         self.assertEqual(tuple(reconstructed.shape), (1, 10, size, size))
         self.assertTrue(torch.isfinite(reconstructed).all())
 
         seed = torch.tensor([42])
         absent = torch.zeros_like(present)
+        isotropic = isotropic_multiscale_seed_field(seed, size, size)
         generated_a = self.model(
             torch.zeros_like(image),
             absent,
             condition,
-            periodic_seed_field(seed, size, size),
-            rich_periodic_seed_field(seed, size, size),
+            isotropic[:, :6],
+            isotropic,
+            attributes,
         )["maps"]
         generated_b = self.model(
             torch.zeros_like(image),
             absent,
             condition,
-            periodic_seed_field(seed, size, size),
-            rich_periodic_seed_field(seed, size, size),
+            isotropic[:, :6],
+            isotropic,
+            attributes,
         )["maps"]
         self.assertTrue(torch.equal(generated_a, generated_b))
+
+        flat = parse_prompt("forest green powder-coated aluminum, nearly flat relief")
+        flat_condition = torch.from_numpy(flat["condition"])[None]
+        flat_attributes = torch.from_numpy(flat["attributes"])[None]
+        flat_result = self.model(
+            torch.zeros_like(image),
+            absent,
+            flat_condition,
+            isotropic[:, :6],
+            isotropic,
+            flat_attributes,
+        )
+        self.assertTrue(torch.equal(flat_result["limiter_gates"], torch.zeros(1, 3)))
 
     def test_cli_writes_six_maps_and_manifest(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
@@ -102,7 +128,7 @@ class PublicContractTest(unittest.TestCase):
             for name in MAP_FILES:
                 self.assertTrue((output / "maps" / f"{name}.png").is_file())
             saved = json.loads((output / "inference_manifest.json").read_text(encoding="utf-8"))
-            self.assertEqual(saved["model"]["total_parameters"], 4_042_230)
+            self.assertEqual(saved["model"]["total_parameters"], 4_443_261)
 
 
 if __name__ == "__main__":

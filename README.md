@@ -17,14 +17,14 @@
   &nbsp;&nbsp;
   <code>TEXT + SEED · EXPERIMENTAL</code>
   &nbsp;&nbsp;
-  <code>4,042,230 PARAMS</code>
+  <code>4,443,261 PARAMS</code>
   &nbsp;&nbsp;
   <code>512 PX · 6 MAPS</code>
 </p>
 
 ## English
 
-SKPBR is my small attempt at turning a material reference into something you can actually plug into Blender or a game engine. The current v0.2 checkpoint has **4,042,230 parameters** and writes six 512px PBR maps:
+SKPBR is my small attempt at turning a material reference into something you can actually plug into Blender or a game engine. The current v0.3 checkpoint has **4,443,261 parameters** and writes six 512px PBR maps:
 
 - BaseColor
 - Roughness
@@ -42,28 +42,30 @@ I'll say the awkward part first: this is not yet a general “one phone photo in
 
 ### What the latest blind test looks like
 
-This sheet contains twelve procedural materials generated only after the weights were frozen. Each row compares the input-side target with the current result. It is deliberately not a cherry-picked beauty reel.
+Blind-F was generated once, after the v0.3 weights and evaluator were both frozen. The left half shows input, image + Prompt, and text-only results. The right half shows the image-guided reconstruction beside its six PBR maps. Click it for the full 3424 × 8370 sheet.
 
-![SKPBR D41 twelve-material frozen evaluation](examples/plane-d41/fresh12b_contact_sheet.jpg)
+[![SKPBR v0.3 Blind-F side-by-side result](examples/blind-f/skpbr_blind_f_showcase_side_by_side.jpg)](examples/blind-f/skpbr_blind_f_showcase_side_by_side.jpg)
 
-The image-plus-text path is already useful for metals, coatings, concrete, ceramic, and several stone-like surfaces. Dark leather, denim, cork, brick roughness, and some ABS finishes still need work. The same-material color test passed red, blue, and orange, but missed white; [the four-color sheet is here](examples/plane-d41/same_material_color_b_contact_sheet.jpg).
+This is not a beauty reel. Only brushed titanium and forest-green powder-coated aluminum passed every per-material identity check: **2 / 12** against a required 9 / 12. The model gets the broad physical regime right and usually lands near the requested Roughness and Metallic values, but BaseColor can drift badly on sand, terrazzo, brick, ceramic, and concrete. Color edges also still leak into Normal and Height.
 
 ### Numbers worth knowing
 
 | Check | Result | Status |
 |---|---:|---|
-| Parameters | 4,042,230 | — |
-| Frozen D10 BaseColor MAE | 0.04967 | pass, ceiling 0.10 |
-| Frozen D10 Roughness MAE | 0.06145 | pass |
-| Frozen D10 Metallic MAE | 0.00455 | pass |
-| Frozen D10 Normal error | 13.68° | pass |
-| Frozen D10 rerender MAE | 0.03702 | pass |
+| Parameters | 4,443,261 | — |
+| Blind-F material identities | 2 / 12 | fail, required 9 |
+| Blind-F aggregate gates | 13 / 20 | fail |
+| Image BaseColor MAE | 0.10417 | fail, ceiling 0.065 |
+| Image Roughness MAE | 0.07599 | pass |
+| Image Metallic MAE | 0.03061 | pass |
+| Image Normal error | 11.73° | pass |
+| Image rerender MAE | 0.06548 | fail, ceiling 0.060 |
+| Color → geometry leakage | 0.08874 | fail, ceiling 0.030 |
+| Text-only mean-color MAE | 0.15295 | pass |
 | Catastrophic metal/non-metal swaps | 0 | pass |
-| Fresh-12B combined identities | 6 / 12 | fail, required 8 |
-| Same material, four colors | 3 / 4 | white failed |
-| Peak training VRAM estimate | 5.07 GiB | below the 8 GiB cap |
+| Peak D49–D51 training VRAM | 2.411 GiB | below the 8 GiB cap |
 
-The D10 set contains 81 held-out examples. Fresh-12B is a second one-shot suite created after the Prompt adapter was frozen; it was not used for another tuning round. Release metrics and known limitations are summarized in the [model card](docs/MODEL_CARD.md).
+D49 improved the frozen development objective by 11.6% with a 55-dimensional structured Prompt. D50 added an exact zero-relief path and improved its relief objective by 1.54%. D51's 512px spatial separator did not beat the zero-residual baseline, so the trained residual was rejected instead of being smuggled into the release. Blind-F is now consumed and will not be used for another optimization or checkpoint-selection round. More detail is in the [model card](docs/MODEL_CARD.md).
 
 ### Install
 
@@ -115,7 +117,7 @@ Not established yet:
 
 ### What is published
 
-The repository contains inference code, the frozen v0.2 checkpoint, tests, and two compact D41 evaluation sheets. Detailed internal reports, release logs, source PBR libraries, training images, private caches, optimizer states, sample identities, and nearest-neighbor catalogs are intentionally kept out of the current GitHub tree.
+The repository contains inference code, the frozen v0.3 checkpoint, tests, the compact older D41 sheets, and one honest Blind-F result board. Detailed internal reports, release logs, source PBR libraries, training images, private caches, optimizer states, sample identities, and nearest-neighbor catalogs are intentionally kept out of the current GitHub tree.
 
 ### License
 
@@ -123,7 +125,7 @@ Repository-authored code and the exported SKPBR checkpoint are released under th
 
 ## 简体中文
 
-SKPBR 是我把材质参考图变成 Blender 或游戏引擎里能直接用的 PBR 贴图的一次小实验。现在的 v0.2 模型有 **4,042,230 个参数**，会输出六张 512px 贴图：BaseColor、Roughness、Metallic、OpenGL +Y Normal、Height 和 AO。
+SKPBR 是我把材质参考图变成 Blender 或游戏引擎里能直接用的 PBR 贴图的一次小实验。现在的 v0.3 模型有 **4,443,261 个参数**，会输出六张 512px 贴图：BaseColor、Roughness、Metallic、OpenGL +Y Normal、Height 和 AO。
 
 这一版支持两种输入：
 
@@ -134,28 +136,30 @@ SKPBR 是我把材质参考图变成 Blender 或游戏引擎里能直接用的 P
 
 ### 最新一轮盲测
 
-下面是权重冻结后才生成的 12 种程序化材质。每一行都在比较输入侧目标和当前输出，没有特意只挑好看的结果。
+Blind-F 是在 v0.3 权重和评估器全部冻结后，才一次性生成的 12 种程序化材质。左半边是输入、图片 + Prompt、纯文字结果；右半边是图片引导重建的大图和六张 PBR 贴图。点击可以查看 3424 × 8370 原图。
 
-![SKPBR D41 十二材质冻结评估](examples/plane-d41/fresh12b_contact_sheet.jpg)
+[![SKPBR v0.3 Blind-F 横向成果图](examples/blind-f/skpbr_blind_f_showcase_side_by_side.jpg)](examples/blind-f/skpbr_blind_f_showcase_side_by_side.jpg)
 
-目前图像 + 文字模式在金属、涂层、混凝土、陶瓷和一部分石材上已经有使用价值。深色皮革、牛仔布、软木、红砖 Roughness 和部分 ABS 表面仍然比较弱。同材质异色测试中红、蓝、橙通过，白色失败；[四色对比图在这里](examples/plane-d41/same_material_color_b_contact_sheet.jpg)。
+这不是只挑好看的效果集。12 个材质里，只有拉丝钛板和森林绿粉末涂层铝板通过了全部逐材质检查：**2 / 12**，而验收要求是 9 / 12。模型对金属/非金属类别、Roughness 和 Metallic 的判断已经比较稳，但细沙、磨石子、红砖、陶瓷和混凝土仍会发生明显 BaseColor 偏移，颜色边缘也会被错误写进 Normal 和 Height。
 
 ### 几个关键数字
 
 | 检查项 | 结果 | 状态 |
 |---|---:|---|
-| 参数量 | 4,042,230 | — |
-| 冻结 D10 BaseColor MAE | 0.04967 | 通过，上限 0.10 |
-| 冻结 D10 Roughness MAE | 0.06145 | 通过 |
-| 冻结 D10 Metallic MAE | 0.00455 | 通过 |
-| 冻结 D10 Normal 角度误差 | 13.68° | 通过 |
-| 冻结 D10 重渲染 MAE | 0.03702 | 通过 |
+| 参数量 | 4,443,261 | — |
+| Blind-F 材质身份 | 2 / 12 | 未通过，要求 9 |
+| Blind-F 总体指标门 | 13 / 20 | 未通过 |
+| 图片 BaseColor MAE | 0.10417 | 未通过，上限 0.065 |
+| 图片 Roughness MAE | 0.07599 | 通过 |
+| 图片 Metallic MAE | 0.03061 | 通过 |
+| 图片 Normal 角度误差 | 11.73° | 通过 |
+| 图片重渲染 MAE | 0.06548 | 未通过，上限 0.060 |
+| 颜色 → 几何泄漏 | 0.08874 | 未通过，上限 0.030 |
+| 纯文字平均颜色 MAE | 0.15295 | 通过 |
 | 金属/非金属灾难性互换 | 0 | 通过 |
-| Fresh-12B 综合身份通过数 | 6 / 12 | 未通过，要求 8 |
-| 同材质四色 | 3 / 4 | 白色失败 |
-| 训练峰值显存估算 | 5.07 GiB | 低于 8 GiB 限制 |
+| D49–D51 训练峰值显存 | 2.411 GiB | 低于 8 GiB 限制 |
 
-D10 是 81 个冻结测试样本。Fresh-12B 是 Prompt 适配器冻结后才生成的第二套一次性测试，失败后没有继续拿它调参。发布指标和已知限制集中写在[模型卡](docs/MODEL_CARD.md)里。
+D49 加入了 55 维结构化 Prompt，冻结开发集目标改善 11.6%；D50 加入精确零起伏路径，起伏目标改善 1.54%。D51 的 512px 空间分离头没有超过零残差基线，因此训练后的残差没有被硬塞进发布版。Blind-F 从现在起视为已消费测试集，不会继续拿来调参或挑权重。详细限制写在[模型卡](docs/MODEL_CARD.md)里。
 
 ### 安装
 
@@ -207,7 +211,7 @@ skpbr \
 
 ### 仓库里有什么
 
-仓库只保留推理代码、冻结的 v0.2 权重、测试和两张精简的 D41 评估图。内部训练报告、发布日志、源 PBR 库、训练图片、私有缓存、优化器状态、样本身份和近邻检索目录都不会长期摆在当前 GitHub 目录里。
+仓库只保留推理代码、冻结的 v0.3 权重、测试、旧的精简 D41 图和一张如实展示 Blind-F 的成果板。内部训练报告、发布日志、源 PBR 库、训练图片、私有缓存、优化器状态、样本身份和近邻检索目录都不会长期摆在当前 GitHub 目录里。
 
 ### 许可证
 

@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.3.0 - 2026-08-02
+
+- Released the 4,443,261-parameter D49–D51 structured-relief checkpoint.
+- Added 55-dimensional structured Prompt attributes for material regime, primary/secondary color, finish and relief.
+- Restored explicit Chinese aliases for automotive metallic paint in the public Prompt parser.
+- Replaced the directional text seed basis with deterministic isotropic multiscale noise.
+- Added an exact zero-relief path for explicitly flat materials.
+- Kept the D51 spatial separator at its zero-residual baseline because trained epochs did not improve the frozen objective.
+- Published one combined Blind-F result board with input, image + Prompt, text-only, reconstructed render and six maps.
+- Reported the failed Blind-F result without retuning on it: 2/12 identities and 13/20 aggregate gates.
+
 ## 0.2.0 - 2026-08-01
 
 - Replaced the public BaseColor-only head with the 4,042,230-parameter D41 planar dual-mode checkpoint.
