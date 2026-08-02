@@ -16,7 +16,7 @@ from PIL import Image
 
 
 ROOT = Path(__file__).resolve().parents[1]
-CHECKPOINT = ROOT / "src" / "skpbr" / "weights" / "skpbr_v0_3_structured_relief.pt"
+CHECKPOINT = ROOT / "src" / "skpbr" / "weights" / "skpbr_v0_4_albedo_disentangled.pt"
 TEXT_SUFFIXES = {
     ".cff",
     ".gitignore",
@@ -53,7 +53,7 @@ INTERNAL_TOKENS = (
 PUBLIC_IMAGE_DIMENSIONS = {
     "examples/plane-d41/fresh12b_contact_sheet.jpg": (1680, 4190),
     "examples/plane-d41/same_material_color_b_contact_sheet.jpg": (1680, 1470),
-    "examples/blind-f/skpbr_blind_f_showcase_side_by_side.jpg": (3424, 8370),
+    "examples/blind-g/skpbr_blind_g_showcase_side_by_side.jpg": (3400, 8370),
 }
 ALLOWED_PUBLIC_IMAGES = set(PUBLIC_IMAGE_DIMENSIONS)
 
@@ -121,7 +121,7 @@ def audit() -> tuple[dict[str, object], dict[str, object]]:
     state = payload.get("model") if isinstance(payload, dict) else None
     checkpoint_tensor_only = (
         isinstance(state, dict)
-        and len(state) == 312
+        and len(state) == 406
         and all(isinstance(key, str) for key in state)
         and all(torch.is_tensor(value) for value in state.values())
     )
@@ -140,12 +140,12 @@ def audit() -> tuple[dict[str, object], dict[str, object]]:
         and not missing_public_example_files
         and not invalid_example_dimensions
         and checkpoint_tensor_only
-        and state_tensor_elements == 4_443_264
-        and parameter_count == 4_443_261
+        and state_tensor_elements == 4_586_980
+        and parameter_count == 4_586_975
         and not checkpoint_private_hits
     )
     manifest = {
-        "schema": "skpbr-public-release-manifest-v3",
+        "schema": "skpbr-public-release-manifest-v4",
         "generated_utc": datetime.now(timezone.utc).isoformat(),
         "files": [
             {
@@ -157,7 +157,7 @@ def audit() -> tuple[dict[str, object], dict[str, object]]:
         ],
     }
     report = {
-        "schema": "skpbr-public-release-audit-v3",
+        "schema": "skpbr-public-release-audit-v4",
         "generated_utc": datetime.now(timezone.utc).isoformat(),
         "status": "passed" if passed else "failed",
         "checks": {

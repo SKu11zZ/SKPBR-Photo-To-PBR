@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.4.0 - 2026-08-02
+
+- Released the 4,586,975-parameter D52–D54 albedo-disentangled checkpoint.
+- Added a full-resolution photometric BaseColor refiner and a conservative color/geometry separation head.
+- Jointly tuned lightweight adapters with image + Prompt, image-only, and text-only batches while keeping the 3.41M-parameter core frozen.
+- Reduced the frozen development objective from 0.70650 to 0.69374 and color-to-geometry leakage from 0.06614 to 0.06158.
+- Published one combined Blind-G result board after freezing the v0.4 weights.
+- Reported the failed Blind-G result without retuning on it: 2/12 identities, 12/20 aggregate gates, and zero catastrophic physical-regime failures.
+
 ## 0.3.0 - 2026-08-02
 
 - Released the 4,443,261-parameter D49–D51 structured-relief checkpoint.

@@ -44,12 +44,12 @@ class PublicContractTest(unittest.TestCase):
 
     def test_checkpoint_contract(self) -> None:
         state = self.payload["model"]
-        self.assertEqual(len(state), 312)
-        self.assertEqual(sum(tensor.numel() for tensor in state.values()), 4_443_264)
-        self.assertEqual(self.payload["parameter_count"], 4_443_261)
+        self.assertEqual(len(state), 406)
+        self.assertEqual(sum(tensor.numel() for tensor in state.values()), 4_586_980)
+        self.assertEqual(self.payload["parameter_count"], 4_586_975)
         self.assertTrue(all(isinstance(key, str) for key in state))
         self.assertTrue(all(torch.is_tensor(value) for value in state.values()))
-        self.assertEqual(parameter_count(self.model), 4_443_261)
+        self.assertEqual(parameter_count(self.model), 4_586_975)
 
     @torch.inference_mode()
     def test_image_and_text_only_forward(self) -> None:
@@ -128,7 +128,7 @@ class PublicContractTest(unittest.TestCase):
             for name in MAP_FILES:
                 self.assertTrue((output / "maps" / f"{name}.png").is_file())
             saved = json.loads((output / "inference_manifest.json").read_text(encoding="utf-8"))
-            self.assertEqual(saved["model"]["total_parameters"], 4_443_261)
+            self.assertEqual(saved["model"]["total_parameters"], 4_586_975)
 
 
 if __name__ == "__main__":

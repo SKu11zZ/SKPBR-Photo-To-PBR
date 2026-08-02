@@ -1,6 +1,7 @@
 """Public SKPBR planar material research-preview package."""
 
-from .model import StructuredReliefSpatialPBRNet, parameter_count
+from .albedo import AlbedoDisentangledMultimodalPBRNet
+from .model import parameter_count
 
-__all__ = ["StructuredReliefSpatialPBRNet", "parameter_count"]
-__version__ = "0.3.0"
+__all__ = ["AlbedoDisentangledMultimodalPBRNet", "parameter_count"]
+__version__ = "0.4.0"

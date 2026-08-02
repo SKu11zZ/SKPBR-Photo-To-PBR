@@ -17,19 +17,20 @@ from .io import (
     save_preview,
     sha256,
 )
-from .model import (
-    StructuredReliefSpatialPBRNet,
-    isotropic_multiscale_seed_field,
-    parameter_manifest,
-)
+from .albedo import AlbedoDisentangledMultimodalPBRNet, parameter_manifest
+from .model import isotropic_multiscale_seed_field
 from .prompt import parse_prompt
 
 
-DEFAULT_CHECKPOINT_SHA256 = "cd8611c0e721c0c917e9edba07a74256ed6ba68f047a681bdf11327924d4e970"
+DEFAULT_CHECKPOINT_SHA256 = "ff8ba4299e01eb687bd639fa4376db8476ffe216f77f57ef44adf92b7e9395a0"
 
 
 def default_checkpoint() -> str:
-    return str(Path(__file__).resolve().parent / "weights" / "skpbr_v0_3_structured_relief.pt")
+    return str(
+        Path(__file__).resolve().parent
+        / "weights"
+        / "skpbr_v0_4_albedo_disentangled.pt"
+    )
 
 
 def resolve_device(requested: str) -> torch.device:
@@ -40,7 +41,9 @@ def resolve_device(requested: str) -> torch.device:
     return torch.device(requested)
 
 
-def load_model(checkpoint: Path, device: torch.device) -> tuple[StructuredReliefSpatialPBRNet, dict[str, object]]:
+def load_model(
+    checkpoint: Path, device: torch.device
+) -> tuple[AlbedoDisentangledMultimodalPBRNet, dict[str, object]]:
     if not checkpoint.is_file():
         raise FileNotFoundError(checkpoint)
     digest = sha256(checkpoint)
@@ -48,8 +51,8 @@ def load_model(checkpoint: Path, device: torch.device) -> tuple[StructuredRelief
         raise RuntimeError("Bundled checkpoint SHA-256 mismatch")
     payload = torch.load(checkpoint, map_location="cpu", weights_only=True)
     if not isinstance(payload, dict) or not isinstance(payload.get("model"), dict):
-        raise RuntimeError("Expected a tensor-only SKPBR v0.3 checkpoint payload")
-    model = StructuredReliefSpatialPBRNet()
+        raise RuntimeError("Expected a tensor-only SKPBR v0.4 checkpoint payload")
+    model = AlbedoDisentangledMultimodalPBRNet()
     model.load_state_dict(payload["model"], strict=True)
     model.requires_grad_(False)
     return model.to(device).eval(), payload
@@ -96,7 +99,7 @@ def run(options: argparse.Namespace) -> dict[str, object]:
     save_map_set(output / "maps", maps)
     save_preview(output / "preview.png", render_plane(maps.unsqueeze(0), variant=0)[0])
     metadata: dict[str, object] = {
-        "schema": "skpbr-v0.3-structured-relief-inference",
+        "schema": "skpbr-v0.4-albedo-disentangled-inference",
         "created_utc": datetime.now(timezone.utc).isoformat(),
         "mode": mode,
         "mode_semantics": (
@@ -121,8 +124,8 @@ def run(options: argparse.Namespace) -> dict[str, object]:
         "checkpoint_epoch": payload.get("selected_epoch", payload.get("epoch")),
         "target_or_library_asset_reads": 0,
         "known_status": {
-            "image_prompt_mode": "research preview; Blind-F failed BaseColor, micro-normal and color-to-geometry leakage gates",
-            "prompt_only_mode": "experimental; Blind-F material identity passed 2/12",
+            "image_prompt_mode": "research preview; Blind-G failed BaseColor, micro-normal and color-to-geometry leakage gates",
+            "prompt_only_mode": "experimental; Blind-G material identity passed 2/12",
             "resolution": "512 px is the evaluated release resolution",
         },
     }
@@ -147,7 +150,7 @@ def arguments() -> argparse.Namespace:
 def main() -> None:
     metadata = run(arguments())
     if metadata["mode"] == "prompt_seed_generation":
-        print("WARNING: text-only generation is experimental and passed only 2/12 Blind-F material identities.")
+        print("WARNING: text-only generation is experimental and passed only 2/12 Blind-G material identities.")
     print(json.dumps(metadata, ensure_ascii=False, indent=2))
 
 

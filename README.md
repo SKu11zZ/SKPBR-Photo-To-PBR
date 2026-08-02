@@ -17,14 +17,14 @@
   &nbsp;&nbsp;
   <code>TEXT + SEED · EXPERIMENTAL</code>
   &nbsp;&nbsp;
-  <code>4,443,261 PARAMS</code>
+  <code>4,586,975 PARAMS</code>
   &nbsp;&nbsp;
   <code>512 PX · 6 MAPS</code>
 </p>
 
 ## English
 
-SKPBR is my small attempt at turning a material reference into something you can actually plug into Blender or a game engine. The current v0.3 checkpoint has **4,443,261 parameters** and writes six 512px PBR maps:
+SKPBR is my small attempt at turning a material reference into something you can actually plug into Blender or a game engine. The current v0.4 checkpoint has **4,586,975 parameters** and writes six 512px PBR maps:
 
 - BaseColor
 - Roughness
@@ -42,30 +42,30 @@ I'll say the awkward part first: this is not yet a general “one phone photo in
 
 ### What the latest blind test looks like
 
-Blind-F was generated once, after the v0.3 weights and evaluator were both frozen. The left half shows input, image + Prompt, and text-only results. The right half shows the image-guided reconstruction beside its six PBR maps. Click it for the full 3424 × 8370 sheet.
+Blind-G was generated once, after the v0.4 weights were frozen. The left half shows input, image + Prompt, and text-only results. The right half shows the image-guided reconstruction beside its six PBR maps. Click it for the full 3400 × 8370 sheet.
 
-[![SKPBR v0.3 Blind-F side-by-side result](examples/blind-f/skpbr_blind_f_showcase_side_by_side.jpg)](examples/blind-f/skpbr_blind_f_showcase_side_by_side.jpg)
+[![SKPBR v0.4 Blind-G side-by-side result](examples/blind-g/skpbr_blind_g_showcase_side_by_side.jpg)](examples/blind-g/skpbr_blind_g_showcase_side_by_side.jpg)
 
-This is not a beauty reel. Only brushed titanium and forest-green powder-coated aluminum passed every per-material identity check: **2 / 12** against a required 9 / 12. The model gets the broad physical regime right and usually lands near the requested Roughness and Metallic values, but BaseColor can drift badly on sand, terrazzo, brick, ceramic, and concrete. Color edges also still leak into Normal and Height.
+This is not a beauty reel. Only bead-blasted aluminum and black-aggregate concrete passed every per-material identity check: **2 / 12** against a required 9 / 12. The copper-patina image reconstruction is close, and the latex and car-paint image paths are usable starting points, but their text-only texture checks still fail. ABS, limestone, basalt, marble, and terracotta expose the larger problem: low-frequency color and material identity do not generalize reliably yet.
 
 ### Numbers worth knowing
 
 | Check | Result | Status |
 |---|---:|---|
-| Parameters | 4,443,261 | — |
-| Blind-F material identities | 2 / 12 | fail, required 9 |
-| Blind-F aggregate gates | 13 / 20 | fail |
-| Image BaseColor MAE | 0.10417 | fail, ceiling 0.065 |
-| Image Roughness MAE | 0.07599 | pass |
-| Image Metallic MAE | 0.03061 | pass |
-| Image Normal error | 11.73° | pass |
-| Image rerender MAE | 0.06548 | fail, ceiling 0.060 |
-| Color → geometry leakage | 0.08874 | fail, ceiling 0.030 |
-| Text-only mean-color MAE | 0.15295 | pass |
+| Parameters | 4,586,975 | — |
+| Blind-G material identities | 2 / 12 | fail, required 9 |
+| Blind-G aggregate gates | 12 / 20 | fail |
+| Image BaseColor MAE | 0.11287 | fail, ceiling 0.065 |
+| Image Roughness MAE | 0.07469 | pass |
+| Image Metallic MAE | 0.02376 | pass |
+| Image Normal error | 10.05° | pass |
+| Image rerender MAE | 0.06890 | fail, ceiling 0.060 |
+| Color → geometry leakage | 0.06837 | fail, ceiling 0.030 |
+| Text-only mean-color MAE | 0.15637 | pass |
 | Catastrophic metal/non-metal swaps | 0 | pass |
-| Peak D49–D51 training VRAM | 2.411 GiB | below the 8 GiB cap |
+| Peak D52–D54 whole-device estimate | 4.280 GiB | below the 8 GiB cap |
 
-D49 improved the frozen development objective by 11.6% with a 55-dimensional structured Prompt. D50 added an exact zero-relief path and improved its relief objective by 1.54%. D51's 512px spatial separator did not beat the zero-residual baseline, so the trained residual was rejected instead of being smuggled into the release. Blind-F is now consumed and will not be used for another optimization or checkpoint-selection round. More detail is in the [model card](docs/MODEL_CARD.md).
+D52 added a photometric BaseColor head; D53 added a conservative color/geometry separator; D54 jointly tuned the lightweight adapters across image + Prompt, image-only, and text-only batches. On the frozen development split, BaseColor MAE moved from 0.05920 to 0.05878 and color-to-geometry leakage from 0.06614 to 0.06158. Blind-G is harder and shows that this improvement does not yet travel far enough outside the development distribution. Blind-G is now consumed and will not be used for another optimization or checkpoint-selection round. More detail is in the [model card](docs/MODEL_CARD.md).
 
 ### Install
 
@@ -117,7 +117,7 @@ Not established yet:
 
 ### What is published
 
-The repository contains inference code, the frozen v0.3 checkpoint, tests, the compact older D41 sheets, and one honest Blind-F result board. Detailed internal reports, release logs, source PBR libraries, training images, private caches, optimizer states, sample identities, and nearest-neighbor catalogs are intentionally kept out of the current GitHub tree.
+The repository contains inference code, the frozen v0.4 checkpoint, tests, the compact older D41 sheets, and one honest Blind-G result board. Detailed internal reports, release logs, source PBR libraries, training images, private caches, optimizer states, sample identities, and nearest-neighbor catalogs are intentionally kept out of the current GitHub tree.
 
 ### License
 
@@ -125,7 +125,7 @@ Repository-authored code and the exported SKPBR checkpoint are released under th
 
 ## 简体中文
 
-SKPBR 是我把材质参考图变成 Blender 或游戏引擎里能直接用的 PBR 贴图的一次小实验。现在的 v0.3 模型有 **4,443,261 个参数**，会输出六张 512px 贴图：BaseColor、Roughness、Metallic、OpenGL +Y Normal、Height 和 AO。
+SKPBR 是我把材质参考图变成 Blender 或游戏引擎里能直接用的 PBR 贴图的一次小实验。现在的 v0.4 模型有 **4,586,975 个参数**，会输出六张 512px 贴图：BaseColor、Roughness、Metallic、OpenGL +Y Normal、Height 和 AO。
 
 这一版支持两种输入：
 
@@ -136,30 +136,30 @@ SKPBR 是我把材质参考图变成 Blender 或游戏引擎里能直接用的 P
 
 ### 最新一轮盲测
 
-Blind-F 是在 v0.3 权重和评估器全部冻结后，才一次性生成的 12 种程序化材质。左半边是输入、图片 + Prompt、纯文字结果；右半边是图片引导重建的大图和六张 PBR 贴图。点击可以查看 3424 × 8370 原图。
+Blind-G 是在 v0.4 权重冻结后，才一次性生成的 12 种程序化材质。左半边是输入、图片 + Prompt、纯文字结果；右半边是图片引导重建的大图和六张 PBR 贴图。点击可以查看 3400 × 8370 原图。
 
-[![SKPBR v0.3 Blind-F 横向成果图](examples/blind-f/skpbr_blind_f_showcase_side_by_side.jpg)](examples/blind-f/skpbr_blind_f_showcase_side_by_side.jpg)
+[![SKPBR v0.4 Blind-G 横向成果图](examples/blind-g/skpbr_blind_g_showcase_side_by_side.jpg)](examples/blind-g/skpbr_blind_g_showcase_side_by_side.jpg)
 
-这不是只挑好看的效果集。12 个材质里，只有拉丝钛板和森林绿粉末涂层铝板通过了全部逐材质检查：**2 / 12**，而验收要求是 9 / 12。模型对金属/非金属类别、Roughness 和 Metallic 的判断已经比较稳，但细沙、磨石子、红砖、陶瓷和混凝土仍会发生明显 BaseColor 偏移，颜色边缘也会被错误写进 Normal 和 Height。
+这不是只挑好看的效果集。12 个材质里，只有喷砂铝和黑骨料混凝土通过了全部逐材质检查：**2 / 12**，而验收要求是 9 / 12。铜锈的图片重建已经比较接近，乳胶漆和车漆也能当作可继续修改的起点，但它们的纯文字纹理仍没过关。ABS、石灰岩、玄武岩、大理石和赤陶暴露了更根本的问题：低频颜色和材质身份还不能稳定泛化。
 
 ### 几个关键数字
 
 | 检查项 | 结果 | 状态 |
 |---|---:|---|
-| 参数量 | 4,443,261 | — |
-| Blind-F 材质身份 | 2 / 12 | 未通过，要求 9 |
-| Blind-F 总体指标门 | 13 / 20 | 未通过 |
-| 图片 BaseColor MAE | 0.10417 | 未通过，上限 0.065 |
-| 图片 Roughness MAE | 0.07599 | 通过 |
-| 图片 Metallic MAE | 0.03061 | 通过 |
-| 图片 Normal 角度误差 | 11.73° | 通过 |
-| 图片重渲染 MAE | 0.06548 | 未通过，上限 0.060 |
-| 颜色 → 几何泄漏 | 0.08874 | 未通过，上限 0.030 |
-| 纯文字平均颜色 MAE | 0.15295 | 通过 |
+| 参数量 | 4,586,975 | — |
+| Blind-G 材质身份 | 2 / 12 | 未通过，要求 9 |
+| Blind-G 总体指标门 | 12 / 20 | 未通过 |
+| 图片 BaseColor MAE | 0.11287 | 未通过，上限 0.065 |
+| 图片 Roughness MAE | 0.07469 | 通过 |
+| 图片 Metallic MAE | 0.02376 | 通过 |
+| 图片 Normal 角度误差 | 10.05° | 通过 |
+| 图片重渲染 MAE | 0.06890 | 未通过，上限 0.060 |
+| 颜色 → 几何泄漏 | 0.06837 | 未通过，上限 0.030 |
+| 纯文字平均颜色 MAE | 0.15637 | 通过 |
 | 金属/非金属灾难性互换 | 0 | 通过 |
-| D49–D51 训练峰值显存 | 2.411 GiB | 低于 8 GiB 限制 |
+| D52–D54 整卡峰值估算 | 4.280 GiB | 低于 8 GiB 限制 |
 
-D49 加入了 55 维结构化 Prompt，冻结开发集目标改善 11.6%；D50 加入精确零起伏路径，起伏目标改善 1.54%。D51 的 512px 空间分离头没有超过零残差基线，因此训练后的残差没有被硬塞进发布版。Blind-F 从现在起视为已消费测试集，不会继续拿来调参或挑权重。详细限制写在[模型卡](docs/MODEL_CARD.md)里。
+D52 加入光度 BaseColor 修正头，D53 加入保守的颜色/几何分离头，D54 再用图片 + Prompt、只输入图片、只输入文字三种批次联合调整轻量适配器。冻结开发集上的 BaseColor MAE 从 0.05920 降到 0.05878，颜色向几何泄漏从 0.06614 降到 0.06158；Blind-G 更难，也说明这些进步还没有充分跨出开发集分布。Blind-G 从现在起视为已消费测试集，不会继续拿来调参或挑权重。详细限制写在[模型卡](docs/MODEL_CARD.md)里。
 
 ### 安装
 
@@ -211,7 +211,7 @@ skpbr \
 
 ### 仓库里有什么
 
-仓库只保留推理代码、冻结的 v0.3 权重、测试、旧的精简 D41 图和一张如实展示 Blind-F 的成果板。内部训练报告、发布日志、源 PBR 库、训练图片、私有缓存、优化器状态、样本身份和近邻检索目录都不会长期摆在当前 GitHub 目录里。
+仓库只保留推理代码、冻结的 v0.4 权重、测试、旧的精简 D41 图和一张如实展示 Blind-G 的成果板。内部训练报告、发布日志、源 PBR 库、训练图片、私有缓存、优化器状态、样本身份和近邻检索目录都不会长期摆在当前 GitHub 目录里。
 
 ### 许可证
 

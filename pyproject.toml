@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "skpbr"
-version = "0.3.0"
+version = "0.4.0"
 description = "A research-preview model for aligned image-plus-text PBR reconstruction and experimental text-only material generation."
 readme = "README.md"
 requires-python = ">=3.10"
