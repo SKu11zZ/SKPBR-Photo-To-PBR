@@ -22,6 +22,14 @@
   <code>512 PX · 6 MAPS</code>
 </p>
 
+<div align="center">
+  <a href="docs/assets/skpbr_v04_six_material_spheres.png">
+    <img src="docs/assets/skpbr_v04_six_material_spheres.png" width="100%" alt="SKPBR v0.4 — six Image + Text PBR materials rendered in Blender">
+  </a>
+  <br>
+  <sub>Six Image + Text reconstructions rendered in Blender · Blender 中的 6 组 Image + Text 材质重建</sub>
+</div>
+
 ## English
 
 SKPBR is my small attempt at turning a material reference into something you can actually plug into Blender or a game engine. The current v0.4 checkpoint has **4,586,975 parameters** and writes six 512px PBR maps:
