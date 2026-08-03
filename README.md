@@ -46,7 +46,7 @@ There are now two inputs:
 1. **Flat image + text** — reconstruct the visible material patch. This is the useful path today.
 2. **Text + seed** — generate a repeatable material candidate. This path runs, but it is still experimental.
 
-I'll say the awkward part first: this is not yet a general “one phone photo in, production material out” system. The image path expects an aligned, fairly flat material crop with manageable lighting. Text-only generation failed its final release gate, so please treat those results as starting points rather than ground truth.
+I'll say the awkward part first: this is not yet a general “one phone photo in, production material out” system. The image path expects an aligned, fairly flat material crop with manageable lighting. Text-only generation did not meet its final release threshold, so please treat those results as starting points rather than ground truth.
 
 ### Six selected Blind-G examples
 
@@ -58,7 +58,7 @@ Blind-G contains 12 procedurally generated materials and was produced once, afte
 
 [![SKPBR v0.4 Blind-G representative failure cases](examples/blind-g/blind_g_representative_issues_01_02.png)](examples/blind-g/blind_g_representative_issues_01_02.png)
 
-The six cases are selected for readability; the score is not. Across the complete 12-material run, only bead-blasted aluminum and black-aggregate concrete passed every per-material identity check: **2 / 12** against a required 9 / 12. In the examples above, copper patina stays fairly close to the input and car paint keeps much of its color, while ABS shifts too bright and marble loses its high-information veins. The larger problem is still the same: low-frequency color and material identity do not generalize reliably yet, especially in text-only mode.
+The six cases are selected for readability; the score is not. Across the complete 12-material run, only bead-blasted aluminum and black-aggregate concrete met every per-material consistency check: **2 / 12** against a required 9 / 12. In the examples above, copper patina stays fairly close to the input and car paint keeps much of its color, while ABS shifts too bright and marble loses its high-information veins. The larger problem is still the same: low-frequency color and material-defining features do not generalize reliably yet, especially in text-only mode.
 
 ### Numbers worth knowing
 
@@ -67,19 +67,19 @@ The metrics below are calculated over the complete 12-material Blind-G run, not 
 | Check | Result | Status |
 |---|---:|---|
 | Parameters | 4,586,975 | — |
-| Blind-G material identities | 2 / 12 | fail, required 9 |
-| Blind-G aggregate gates | 12 / 20 | fail |
-| Image BaseColor MAE | 0.11287 | fail, ceiling 0.065 |
-| Image Roughness MAE | 0.07469 | pass |
-| Image Metallic MAE | 0.02376 | pass |
-| Image Normal error | 10.05° | pass |
-| Image rerender MAE | 0.06890 | fail, ceiling 0.060 |
-| Color → geometry leakage | 0.06837 | fail, ceiling 0.030 |
-| Text-only mean-color MAE | 0.15637 | pass |
-| Catastrophic metal/non-metal swaps | 0 | pass |
+| Blind-G materials meeting all consistency checks | 2 / 12 | Not passed; at least 9 required |
+| Blind-G acceptance thresholds met | 12 / 20 | Overall result: not passed |
+| Image BaseColor MAE | 0.11287 | Not passed; threshold ≤ 0.065 |
+| Image Roughness MAE | 0.07469 | Passed |
+| Image Metallic MAE | 0.02376 | Passed |
+| Image Normal error | 10.05° | Passed |
+| Image rerender MAE | 0.06890 | Not passed; threshold ≤ 0.060 |
+| Color → geometry leakage | 0.06837 | Not passed; threshold ≤ 0.030 |
+| Text-only mean-color MAE | 0.15637 | Passed |
+| Catastrophic metal/non-metal swaps | 0 | Passed |
 | Peak D52–D54 whole-device estimate | 4.280 GiB | below the 8 GiB cap |
 
-D52 added a photometric BaseColor head; D53 added a conservative color/geometry separator; D54 jointly tuned the lightweight adapters across image + Prompt, image-only, and text-only batches. On the frozen development split, BaseColor MAE moved from 0.05920 to 0.05878 and color-to-geometry leakage from 0.06614 to 0.06158. Blind-G is harder and shows that this improvement does not yet travel far enough outside the development distribution. Blind-G is now consumed and will not be used for another optimization or checkpoint-selection round. More detail is in the [model card](docs/MODEL_CARD.md).
+D52 added a photometric BaseColor head; D53 added a conservative color/geometry separator; D54 jointly tuned the lightweight adapters across image + Prompt, image-only, and text-only batches. On the frozen development split, BaseColor MAE moved from 0.05920 to 0.05878 and color-to-geometry leakage from 0.06614 to 0.06158. Blind-G is harder and shows that this improvement does not yet travel far enough outside the development distribution. Blind-G has now been used for diagnosis and will not be reused for optimization or checkpoint selection. More detail is in the [model card](docs/MODEL_CARD.md).
 
 ### Install
 
@@ -144,9 +144,9 @@ SKPBR 是我把材质参考图变成 Blender 或游戏引擎里能直接用的 P
 这一版支持两种输入：
 
 1. **平面图片 + 文字**：重建图片里可见的材质。这是目前真正能用的主路径。
-2. **只输入文字 + Seed**：生成一套可以复现的材质候选。它已经能跑，但仍然属于实验功能。
+2. **只输入文字 + 随机种子（Seed）**：生成一套可以复现的材质候选。它已经能跑，但仍然属于实验功能。
 
-先把不好听的话说在前面：它还不是“随便拍张手机照片就能得到生产级材质”的系统。图片最好是对齐、比较平整、光照可控的材质局部。纯文字生成也没有通过最后一道发布门槛，所以更适合拿来做起点，不适合当成标准答案。
+先把不好听的话说在前面：它还不是“随便拍张手机照片就能得到生产级材质”的系统。图片最好是对齐、比较平整、光照可控的材质局部。纯文字生成也没有达到最终的发布验收阈值，所以更适合拿来做起点，不适合当成标准答案。
 
 ### Blind-G 六个代表案例
 
@@ -158,7 +158,7 @@ Blind-G 一共有 12 种程序化材质，是在 v0.4 权重冻结后才一次�
 
 [![SKPBR v0.4 Blind-G 代表性问题材质](examples/blind-g/blind_g_representative_issues_01_02.png)](examples/blind-g/blind_g_representative_issues_01_02.png)
 
-六个案例是为了方便展示而选的，但下面的分数没有挑选。完整的 12 材质盲测里，只有喷砂铝和黑骨料混凝土通过了全部逐材质检查：**2 / 12**，而验收要求是 9 / 12。上面的铜锈重建比较接近输入，车漆也保住了大部分颜色；ABS 被明显提亮，大理石则丢失了高信息密度的纹理。更大的问题仍然是低频颜色和材质身份还不能稳定泛化，纯文字模式尤其明显。
+六个案例只是为了方便展示而选的，下面的汇总指标则来自完整盲测，没有筛选。完整的 12 材质盲测里，只有喷砂铝和黑骨料混凝土通过了全部逐材质一致性检查：**2 / 12**，而验收要求是 9 / 12。上面的铜锈重建比较接近输入，车漆也保住了大部分颜色；ABS 被明显提亮，大理石则丢失了高信息密度的纹理。更大的问题仍然是低频颜色和决定材质类别的特征还不能稳定泛化，纯文字模式尤其明显。
 
 ### 几个关键数字
 
@@ -167,19 +167,19 @@ Blind-G 一共有 12 种程序化材质，是在 v0.4 权重冻结后才一次�
 | 检查项 | 结果 | 状态 |
 |---|---:|---|
 | 参数量 | 4,586,975 | — |
-| Blind-G 材质身份 | 2 / 12 | 未通过，要求 9 |
-| Blind-G 总体指标门 | 12 / 20 | 未通过 |
-| 图片 BaseColor MAE | 0.11287 | 未通过，上限 0.065 |
+| Blind-G 通过全部一致性检查的材质 | 2 / 12 | 未通过，验收要求至少 9 种 |
+| Blind-G 已达到的验收阈值 | 12 / 20 | 总体未通过 |
+| 图片 BaseColor MAE | 0.11287 | 未通过，阈值 ≤ 0.065 |
 | 图片 Roughness MAE | 0.07469 | 通过 |
 | 图片 Metallic MAE | 0.02376 | 通过 |
 | 图片 Normal 角度误差 | 10.05° | 通过 |
-| 图片重渲染 MAE | 0.06890 | 未通过，上限 0.060 |
-| 颜色 → 几何泄漏 | 0.06837 | 未通过，上限 0.030 |
+| 图片重渲染 MAE | 0.06890 | 未通过，阈值 ≤ 0.060 |
+| 颜色 → 几何泄漏 | 0.06837 | 未通过，阈值 ≤ 0.030 |
 | 纯文字平均颜色 MAE | 0.15637 | 通过 |
 | 金属/非金属灾难性互换 | 0 | 通过 |
-| D52–D54 整卡峰值估算 | 4.280 GiB | 低于 8 GiB 限制 |
+| D52–D54 整卡显存峰值估算 | 4.280 GiB | 低于 8 GiB 限制 |
 
-D52 加入光度 BaseColor 修正头，D53 加入保守的颜色/几何分离头，D54 再用图片 + Prompt、只输入图片、只输入文字三种批次联合调整轻量适配器。冻结开发集上的 BaseColor MAE 从 0.05920 降到 0.05878，颜色向几何泄漏从 0.06614 降到 0.06158；Blind-G 更难，也说明这些进步还没有充分跨出开发集分布。Blind-G 从现在起视为已消费测试集，不会继续拿来调参或挑权重。详细限制写在[模型卡](docs/MODEL_CARD.md)里。
+D52 加入 BaseColor 光度修正分支，D53 加入保守的颜色/几何分离模块，D54 再用图片 + Prompt、只输入图片、只输入文字三种批次联合调整轻量适配器。冻结开发集上的 BaseColor MAE 从 0.05920 降到 0.05878，颜色向几何泄漏从 0.06614 降到 0.06158；Blind-G 更难，也说明这些进步还没有充分跨出开发集分布。Blind-G 已经用于本轮诊断，之后不会继续拿来调参或挑权重。详细限制写在[模型卡](docs/MODEL_CARD.md)里。
 
 ### 安装
 
@@ -219,7 +219,7 @@ skpbr \
 - 对齐的平面 RGB 材质局部；
 - 中英文材质描述；
 - 常见非 SSS 金属、涂层、石材、混凝土、砖石、陶瓷、复合材料、软木、皮革和织物；
-- 通过整数 Seed 复现纯文字候选。
+- 通过整数随机种子（Seed）复现纯文字候选。
 
 尚未证明的范围：
 
@@ -231,7 +231,7 @@ skpbr \
 
 ### 仓库里有什么
 
-仓库只保留推理代码、冻结的 v0.4 权重、测试、旧的精简 D41 图，以及覆盖 12 个测试材质中 6 个案例的三张 Blind-G 展示板。内部训练报告、发布日志、源 PBR 库、训练图片、私有缓存、优化器状态、样本身份和近邻检索目录都不会长期摆在当前 GitHub 目录里。
+仓库只保留推理代码、冻结的 v0.4 权重、测试、旧的精简 D41 图，以及覆盖 12 个测试材质中 6 个案例的三张 Blind-G 展示板。内部训练报告、发布日志、源 PBR 库、训练图片、私有缓存、优化器状态、样本标识和近邻检索目录都不会长期摆在当前 GitHub 目录里。
 
 ### 许可证
 

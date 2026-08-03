@@ -6,8 +6,8 @@
 - Added a full-resolution photometric BaseColor refiner and a conservative color/geometry separation head.
 - Jointly tuned lightweight adapters with image + Prompt, image-only, and text-only batches while keeping the 3.41M-parameter core frozen.
 - Reduced the frozen development objective from 0.70650 to 0.69374 and color-to-geometry leakage from 0.06614 to 0.06158.
-- Published one combined Blind-G result board after freezing the v0.4 weights.
-- Reported the failed Blind-G result without retuning on it: 2/12 identities, 12/20 aggregate gates, and zero catastrophic physical-regime failures.
+- Published three selected Blind-G boards covering six of the 12 materials after freezing the v0.4 weights.
+- Reported the Blind-G result without retuning on it: 2/12 materials met all consistency checks, 12/20 acceptance thresholds were met, and there were zero catastrophic physical-regime failures. The overall acceptance threshold was not met.
 
 ## 0.3.0 - 2026-08-02
 
@@ -18,7 +18,7 @@
 - Added an exact zero-relief path for explicitly flat materials.
 - Kept the D51 spatial separator at its zero-residual baseline because trained epochs did not improve the frozen objective.
 - Published one combined Blind-F result board with input, image + Prompt, text-only, reconstructed render and six maps.
-- Reported the failed Blind-F result without retuning on it: 2/12 identities and 13/20 aggregate gates.
+- Reported the Blind-F result without retuning on it: 2/12 materials met all consistency checks and 13/20 acceptance thresholds were met. The overall acceptance threshold was not met.
 
 ## 0.2.0 - 2026-08-01
 
@@ -36,7 +36,7 @@
 - Added the 266,241-parameter BaseColor calibration head.
 - Added deterministic English Prompt conditioning and a source-free CLI.
 - Exported a tensor-only checkpoint.
-- Published aggregate one-shot shadow metrics, including failed gates.
+- Published aggregate one-shot shadow metrics, including acceptance thresholds that were not met.
 - Added bilingual documentation, MIT License, tests, and privacy audit tooling.
 - Added four from-scratch procedural examples with input renders, exact Prompts, output renders, and six-map PBR results.
 - Added a 12-material bilingual coverage audit with full-resolution inputs, output renders, six-map predictions, and an explicit failure analysis.
