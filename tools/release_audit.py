@@ -51,9 +51,12 @@ INTERNAL_TOKENS = (
     "training_" + "target",
 )
 PUBLIC_IMAGE_DIMENSIONS = {
+    "docs/assets/skpbr_v04_six_material_spheres.png": (1920, 1280),
     "examples/plane-d41/fresh12b_contact_sheet.jpg": (1680, 4190),
     "examples/plane-d41/same_material_color_b_contact_sheet.jpg": (1680, 1470),
-    "examples/blind-g/skpbr_blind_g_showcase_side_by_side.jpg": (3400, 8370),
+    "examples/blind-g/blind_g_best_01_02.png": (2800, 1620),
+    "examples/blind-g/blind_g_best_03_04.png": (2800, 1620),
+    "examples/blind-g/blind_g_representative_issues_01_02.png": (2800, 1620),
 }
 ALLOWED_PUBLIC_IMAGES = set(PUBLIC_IMAGE_DIMENSIONS)
 
