@@ -48,9 +48,9 @@ There are now two inputs:
 
 I'll say the awkward part first: this is not yet a general “one phone photo in, production material out” system. The image path expects an aligned, fairly flat material crop with manageable lighting. Text-only generation failed its final release gate, so please treat those results as starting points rather than ground truth.
 
-### What the latest blind test looks like
+### Six selected Blind-G examples
 
-Blind-G was generated once, after the v0.4 weights were frozen. The results are split into three readable boards: two pairs of stronger examples, followed by two representative failures. Each board shows the input, image + Prompt reconstruction, text-only result, six PBR maps, and the matching metrics. Click any image to view it at full size.
+Blind-G contains 12 procedurally generated materials and was produced once, after the v0.4 weights were frozen. To keep this page readable, the gallery below shows six selected cases: four stronger image + Prompt examples on the first two boards, then two representative failures on the third. Each board includes the input, image + Prompt reconstruction, text-only result, six PBR maps, and the matching metrics. Click any image to view it at full size.
 
 [![SKPBR v0.4 Blind-G stronger results 01–02](examples/blind-g/blind_g_best_01_02.png)](examples/blind-g/blind_g_best_01_02.png)
 
@@ -58,9 +58,11 @@ Blind-G was generated once, after the v0.4 weights were frozen. The results are 
 
 [![SKPBR v0.4 Blind-G representative failure cases](examples/blind-g/blind_g_representative_issues_01_02.png)](examples/blind-g/blind_g_representative_issues_01_02.png)
 
-This is not a beauty reel. Only bead-blasted aluminum and black-aggregate concrete passed every per-material identity check: **2 / 12** against a required 9 / 12. The copper-patina image reconstruction is close, and the latex and car-paint image paths are usable starting points, but their text-only texture checks still fail. ABS, limestone, basalt, marble, and terracotta expose the larger problem: low-frequency color and material identity do not generalize reliably yet.
+The six cases are selected for readability; the score is not. Across the complete 12-material run, only bead-blasted aluminum and black-aggregate concrete passed every per-material identity check: **2 / 12** against a required 9 / 12. In the examples above, copper patina stays fairly close to the input and car paint keeps much of its color, while ABS shifts too bright and marble loses its high-information veins. The larger problem is still the same: low-frequency color and material identity do not generalize reliably yet, especially in text-only mode.
 
 ### Numbers worth knowing
+
+The metrics below are calculated over the complete 12-material Blind-G run, not only the six examples shown above.
 
 | Check | Result | Status |
 |---|---:|---|
@@ -129,7 +131,7 @@ Not established yet:
 
 ### What is published
 
-The repository contains inference code, the frozen v0.4 checkpoint, tests, the compact older D41 sheets, and three honest Blind-G result boards. Detailed internal reports, release logs, source PBR libraries, training images, private caches, optimizer states, sample identities, and nearest-neighbor catalogs are intentionally kept out of the current GitHub tree.
+The repository contains inference code, the frozen v0.4 checkpoint, tests, the compact older D41 sheets, and three selected Blind-G boards covering six of the 12 test materials. Detailed internal reports, release logs, source PBR libraries, training images, private caches, optimizer states, sample identities, and nearest-neighbor catalogs are intentionally kept out of the current GitHub tree.
 
 ### License
 
@@ -146,9 +148,9 @@ SKPBR 是我把材质参考图变成 Blender 或游戏引擎里能直接用的 P
 
 先把不好听的话说在前面：它还不是“随便拍张手机照片就能得到生产级材质”的系统。图片最好是对齐、比较平整、光照可控的材质局部。纯文字生成也没有通过最后一道发布门槛，所以更适合拿来做起点，不适合当成标准答案。
 
-### 最新一轮盲测
+### Blind-G 六个代表案例
 
-Blind-G 是在 v0.4 权重冻结后，才一次性生成的 12 种程序化材质。原来的超长图现在拆成三张：前两张是四个相对较好的结果，第三张保留两个有代表性的问题材质。每张图都展示输入、图片 + Prompt 重建、纯文字结果、六张 PBR 贴图和对应指标；点击任意图片可以查看原图。
+Blind-G 一共有 12 种程序化材质，是在 v0.4 权重冻结后才一次性生成的。为了让页面好读，这里只展示其中六个案例：前两张图是四个相对较好的图片 + Prompt 结果，第三张图是两个有代表性的问题材质。每张图都包含输入、图片 + Prompt 重建、纯文字结果、六张 PBR 贴图和对应指标；点击任意图片可以查看原图。
 
 [![SKPBR v0.4 Blind-G 较好结果 01–02](examples/blind-g/blind_g_best_01_02.png)](examples/blind-g/blind_g_best_01_02.png)
 
@@ -156,9 +158,11 @@ Blind-G 是在 v0.4 权重冻结后，才一次性生成的 12 种程序化材�
 
 [![SKPBR v0.4 Blind-G 代表性问题材质](examples/blind-g/blind_g_representative_issues_01_02.png)](examples/blind-g/blind_g_representative_issues_01_02.png)
 
-这不是只挑好看的效果集。12 个材质里，只有喷砂铝和黑骨料混凝土通过了全部逐材质检查：**2 / 12**，而验收要求是 9 / 12。铜锈的图片重建已经比较接近，乳胶漆和车漆也能当作可继续修改的起点，但它们的纯文字纹理仍没过关。ABS、石灰岩、玄武岩、大理石和赤陶暴露了更根本的问题：低频颜色和材质身份还不能稳定泛化。
+六个案例是为了方便展示而选的，但下面的分数没有挑选。完整的 12 材质盲测里，只有喷砂铝和黑骨料混凝土通过了全部逐材质检查：**2 / 12**，而验收要求是 9 / 12。上面的铜锈重建比较接近输入，车漆也保住了大部分颜色；ABS 被明显提亮，大理石则丢失了高信息密度的纹理。更大的问题仍然是低频颜色和材质身份还不能稳定泛化，纯文字模式尤其明显。
 
 ### 几个关键数字
+
+下面的汇总指标来自完整的 12 材质 Blind-G，不是只统计上面展示的六个案例。
 
 | 检查项 | 结果 | 状态 |
 |---|---:|---|
@@ -227,7 +231,7 @@ skpbr \
 
 ### 仓库里有什么
 
-仓库只保留推理代码、冻结的 v0.4 权重、测试、旧的精简 D41 图和三张如实展示 Blind-G 的成果板。内部训练报告、发布日志、源 PBR 库、训练图片、私有缓存、优化器状态、样本身份和近邻检索目录都不会长期摆在当前 GitHub 目录里。
+仓库只保留推理代码、冻结的 v0.4 权重、测试、旧的精简 D41 图，以及覆盖 12 个测试材质中 6 个案例的三张 Blind-G 展示板。内部训练报告、发布日志、源 PBR 库、训练图片、私有缓存、优化器状态、样本身份和近邻检索目录都不会长期摆在当前 GitHub 目录里。
 
 ### 许可证
 
