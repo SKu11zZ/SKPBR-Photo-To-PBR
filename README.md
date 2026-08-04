@@ -98,6 +98,26 @@ python -m venv .venv
 python -m pip install -e .
 ```
 
+### 本地部署要求
+
+下面说的是**推理**，不是训练。模型权重本身约 18.5MB，实际安装空间主要由 PyTorch 和 CUDA 运行库占用。
+
+| 项目 | 实用建议 |
+|---|---|
+| 操作系统 | 64 位 Windows 10/11 或 Linux；当前发布机验证的是 Windows 11 |
+| CPU | 可以只用 CPU 运行；建议使用较新的 64 位多核处理器 |
+| 系统内存 | 建议至少 8GB；开发、批处理或并发请求建议 16GB |
+| GPU | 可选；推荐 NVIDIA CUDA 显卡，512px 推理建议至少有 2GB 可用显存，4GB 以上更稳妥 |
+| 硬盘 | CPU 环境建议预留约 2GB；CUDA 环境建议预留约 5GB，具体取决于 PyTorch 版本 |
+
+本机 RTX 3060 的 512px 发布烟测中，图片 + 文字模式峰值 allocated / reserved 显存约为 **0.604 / 0.926 GiB**，纯文字模式约为 **0.600 / 0.928 GiB**。单套六贴图生成是十秒级，但会随显卡、驱动、PyTorch 版本、模型加载和文件写入速度变化。这是一次单请求测量，不是所有机器的硬性保证。
+
+- `--device auto` 检测到 CUDA 时使用显卡，否则回退到 CPU；CPU 可以运行，但会更慢。
+- 推理本身不需要 Blender；Blender 只用于把输出贴图渲染成材质预览。
+- 依赖和权重安装完成后可以离线推理，程序不会调用云端生成 API。
+- 当前正式路径是 CPU 和 NVIDIA CUDA。AMD/Intel DirectML 与 Apple MPS 尚未纳入发布测试。
+- 512px 是正式评估分辨率；提高分辨率或并发数量都会增加内存与显存占用。
+
 ### 图片 + 文字重建
 
 ```bash
@@ -212,6 +232,26 @@ Python 3.10+ and PyTorch 2.2+ are expected.
 python -m venv .venv
 python -m pip install -e .
 ```
+
+### Local deployment requirements
+
+The figures below describe **inference**, not training. The checkpoint itself is about 18.5MB; PyTorch and the CUDA runtime account for most of the installed size.
+
+| Item | Practical guidance |
+|---|---|
+| Operating system | 64-bit Windows 10/11 or Linux; the current release machine is Windows 11 |
+| CPU | CPU-only inference is supported; a recent 64-bit multicore processor is recommended |
+| System memory | 8GB recommended; 16GB for development, batching, or concurrent requests |
+| GPU | Optional; NVIDIA CUDA is recommended, with at least 2GB of free VRAM for 512px inference and 4GB+ for comfortable headroom |
+| Disk | Reserve about 2GB for a CPU environment or 5GB for a CUDA environment, depending on the PyTorch build |
+
+In the 512px release smoke test on the local RTX 3060, image + text peaked at approximately **0.604 / 0.926 GiB allocated / reserved VRAM**. Text-only inference peaked at **0.600 / 0.928 GiB**. A complete six-map request is on the order of seconds to tens of seconds, depending on GPU, driver, PyTorch build, model loading, and file I/O. These are single-request measurements, not hard guarantees for every machine.
+
+- `--device auto` uses CUDA when available and otherwise falls back to CPU. CPU works, but is slower.
+- Blender is not required for inference; it is only needed to render the output maps as a material preview.
+- Once dependencies and weights are installed, inference can run offline and does not call a cloud generation API.
+- The released paths are CPU and NVIDIA CUDA. AMD/Intel DirectML and Apple MPS are not part of the current test matrix.
+- 512px is the evaluated resolution. Higher resolutions and concurrent requests increase memory and VRAM use.
 
 ### Image + text reconstruction
 
