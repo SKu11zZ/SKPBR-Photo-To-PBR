@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.0 - 2026-08-04
+
+- Replaced the v0.4 checkpoint with the frozen D57 fixed-data checkpoint while keeping the 4,586,975-parameter architecture unchanged.
+- Trained D55-D57 without adding material assets or supervised target files: D55 improved reflectance-color recovery, D56 retained its parent after the attempted geometry remediation did not improve validation, and D57 tuned aligned high-frequency reconstruction.
+- Improved frozen-development image BaseColor MAE from 0.05878 to 0.05577 and rerender MAE from 0.04238 to 0.04077; color-to-geometry leakage moved slightly backward from 0.06158 to 0.06198.
+- Ran the post-freeze Blind-H6 suite: 14/19 aggregate checks passed, 2/6 materials passed every identity check, both BaseColor gates failed, text-only autocorrelation and stripe-structure gates failed, and catastrophic physical-regime failures remained at zero.
+- Replaced the README lead render with a bright 2x3 Blender Cycles gallery and kept the older v0.4 Blind-G boards in a collapsed historical section.
+
 ## 0.4.0 - 2026-08-02
 
 - Released the 4,586,975-parameter D52–D54 albedo-disentangled checkpoint.

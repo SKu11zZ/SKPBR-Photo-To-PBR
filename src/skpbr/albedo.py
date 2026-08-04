@@ -1,4 +1,4 @@
-"""D54 photometric BaseColor recovery and color/geometry separation heads."""
+"""Photometric BaseColor recovery and color/geometry separation heads."""
 
 from __future__ import annotations
 
@@ -265,7 +265,7 @@ class ColorGeometryDisentangler(nn.Module):
 
 
 class AlbedoDisentangledMultimodalPBRNet(StructuredReliefSpatialPBRNet):
-    """Released D54 network built on the frozen v0.3 reconstruction core."""
+    """D54 architecture with the fixed-data D57 weights released in v0.5."""
 
     def __init__(self) -> None:
         super().__init__()

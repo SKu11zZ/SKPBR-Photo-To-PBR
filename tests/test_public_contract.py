@@ -10,6 +10,7 @@ import numpy as np
 from PIL import Image
 import torch
 
+from skpbr import __version__
 from skpbr.cli import default_checkpoint, load_model, run
 from skpbr.io import MAP_FILES
 from skpbr.model import isotropic_multiscale_seed_field, parameter_count
@@ -44,6 +45,10 @@ class PublicContractTest(unittest.TestCase):
 
     def test_checkpoint_contract(self) -> None:
         state = self.payload["model"]
+        self.assertEqual(__version__, "0.5.0")
+        self.assertEqual(
+            self.payload["schema"], "skpbr-v0.5-fixed-data-optimized-checkpoint-v1"
+        )
         self.assertEqual(len(state), 406)
         self.assertEqual(sum(tensor.numel() for tensor in state.values()), 4_586_980)
         self.assertEqual(self.payload["parameter_count"], 4_586_975)
@@ -128,6 +133,9 @@ class PublicContractTest(unittest.TestCase):
             for name in MAP_FILES:
                 self.assertTrue((output / "maps" / f"{name}.png").is_file())
             saved = json.loads((output / "inference_manifest.json").read_text(encoding="utf-8"))
+            self.assertEqual(
+                saved["schema"], "skpbr-v0.5-fixed-data-optimized-inference"
+            )
             self.assertEqual(saved["model"]["total_parameters"], 4_586_975)
 
 

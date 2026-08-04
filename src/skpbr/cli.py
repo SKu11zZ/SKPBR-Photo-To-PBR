@@ -22,14 +22,14 @@ from .model import isotropic_multiscale_seed_field
 from .prompt import parse_prompt
 
 
-DEFAULT_CHECKPOINT_SHA256 = "ff8ba4299e01eb687bd639fa4376db8476ffe216f77f57ef44adf92b7e9395a0"
+DEFAULT_CHECKPOINT_SHA256 = "fe434c5742772d621d7dc91f4c3e97abecf8036d268ff537972463fcf1eebb72"
 
 
 def default_checkpoint() -> str:
     return str(
         Path(__file__).resolve().parent
         / "weights"
-        / "skpbr_v0_4_albedo_disentangled.pt"
+        / "skpbr_v0_5_fixed_data_optimized.pt"
     )
 
 
@@ -51,7 +51,7 @@ def load_model(
         raise RuntimeError("Bundled checkpoint SHA-256 mismatch")
     payload = torch.load(checkpoint, map_location="cpu", weights_only=True)
     if not isinstance(payload, dict) or not isinstance(payload.get("model"), dict):
-        raise RuntimeError("Expected a tensor-only SKPBR v0.4 checkpoint payload")
+        raise RuntimeError("Expected a tensor-only SKPBR v0.5 checkpoint payload")
     model = AlbedoDisentangledMultimodalPBRNet()
     model.load_state_dict(payload["model"], strict=True)
     model.requires_grad_(False)
@@ -99,7 +99,7 @@ def run(options: argparse.Namespace) -> dict[str, object]:
     save_map_set(output / "maps", maps)
     save_preview(output / "preview.png", render_plane(maps.unsqueeze(0), variant=0)[0])
     metadata: dict[str, object] = {
-        "schema": "skpbr-v0.4-albedo-disentangled-inference",
+        "schema": "skpbr-v0.5-fixed-data-optimized-inference",
         "created_utc": datetime.now(timezone.utc).isoformat(),
         "mode": mode,
         "mode_semantics": (
@@ -124,8 +124,8 @@ def run(options: argparse.Namespace) -> dict[str, object]:
         "checkpoint_epoch": payload.get("selected_epoch", payload.get("epoch")),
         "target_or_library_asset_reads": 0,
         "known_status": {
-            "image_prompt_mode": "research preview; Blind-G failed BaseColor, micro-normal and color-to-geometry leakage gates",
-            "prompt_only_mode": "experimental; Blind-G material identity passed 2/12",
+            "image_prompt_mode": "research preview; Blind-H6 failed both BaseColor gates and passed 2/6 material identities",
+            "prompt_only_mode": "experimental; Blind-H6 failed autocorrelation and stripe-structure gates",
             "resolution": "512 px is the evaluated release resolution",
         },
     }
@@ -150,7 +150,7 @@ def arguments() -> argparse.Namespace:
 def main() -> None:
     metadata = run(arguments())
     if metadata["mode"] == "prompt_seed_generation":
-        print("WARNING: text-only generation is experimental and passed only 2/12 Blind-G material identities.")
+        print("WARNING: text-only generation is experimental; Blind-H6 did not meet its structure or material-identity thresholds.")
     print(json.dumps(metadata, ensure_ascii=False, indent=2))
 
 

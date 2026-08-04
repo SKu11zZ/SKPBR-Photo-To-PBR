@@ -16,7 +16,7 @@ from PIL import Image
 
 
 ROOT = Path(__file__).resolve().parents[1]
-CHECKPOINT = ROOT / "src" / "skpbr" / "weights" / "skpbr_v0_4_albedo_disentangled.pt"
+CHECKPOINT = ROOT / "src" / "skpbr" / "weights" / "skpbr_v0_5_fixed_data_optimized.pt"
 TEXT_SUFFIXES = {
     ".cff",
     ".gitignore",
@@ -51,7 +51,7 @@ INTERNAL_TOKENS = (
     "training_" + "target",
 )
 PUBLIC_IMAGE_DIMENSIONS = {
-    "docs/assets/skpbr_v04_six_material_spheres.png": (1920, 1280),
+    "docs/assets/skpbr_v05_bright_studio_2x3.png": (1920, 1280),
     "examples/plane-d41/fresh12b_contact_sheet.jpg": (1680, 4190),
     "examples/plane-d41/same_material_color_b_contact_sheet.jpg": (1680, 1470),
     "examples/blind-g/blind_g_best_01_02.png": (2800, 1620),
@@ -148,7 +148,7 @@ def audit() -> tuple[dict[str, object], dict[str, object]]:
         and not checkpoint_private_hits
     )
     manifest = {
-        "schema": "skpbr-public-release-manifest-v4",
+        "schema": "skpbr-public-release-manifest-v5",
         "generated_utc": datetime.now(timezone.utc).isoformat(),
         "files": [
             {
@@ -160,7 +160,7 @@ def audit() -> tuple[dict[str, object], dict[str, object]]:
         ],
     }
     report = {
-        "schema": "skpbr-public-release-audit-v4",
+        "schema": "skpbr-public-release-audit-v5",
         "generated_utc": datetime.now(timezone.utc).isoformat(),
         "status": "passed" if passed else "failed",
         "checks": {
