@@ -57,6 +57,17 @@ PUBLIC_IMAGE_DIMENSIONS = {
     "examples/blind-g/blind_g_best_01_02.png": (2800, 1620),
     "examples/blind-g/blind_g_best_03_04.png": (2800, 1620),
     "examples/blind-g/blind_g_representative_issues_01_02.png": (2800, 1620),
+    "examples/matsynth-90/images/input_contact_sheet.png": (1600, 1728),
+    "examples/matsynth-90/images/input_vs_output_all90.jpg": (3200, 1710),
+    "examples/matsynth-90/images/details/details_0011_0020.jpg": (1335, 1748),
+    "examples/matsynth-90/images/details/details_0021_0030.jpg": (1335, 1748),
+    "examples/matsynth-90/images/details/details_0031_0040.jpg": (1335, 1748),
+    "examples/matsynth-90/images/details/details_0041_0050.jpg": (1335, 1748),
+    "examples/matsynth-90/images/details/details_0051_0060.jpg": (1335, 1748),
+    "examples/matsynth-90/images/details/details_0061_0070.jpg": (1335, 1748),
+    "examples/matsynth-90/images/details/details_0071_0080.jpg": (1335, 1748),
+    "examples/matsynth-90/images/details/details_0081_0090.jpg": (1335, 1748),
+    "examples/matsynth-90/images/details/details_0091_0100.jpg": (1335, 1748),
 }
 ALLOWED_PUBLIC_IMAGES = set(PUBLIC_IMAGE_DIMENSIONS)
 
@@ -182,7 +193,7 @@ def audit() -> tuple[dict[str, object], dict[str, object]]:
             "resume and optimizer checkpoints",
             "sample identities and split manifests",
             "per-example shadow records",
-            "third-party material assets",
+            "original third-party PBR maps and non-CC0 material assets",
         ],
     }
     return report, manifest

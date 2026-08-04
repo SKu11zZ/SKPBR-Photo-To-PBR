@@ -9,6 +9,8 @@
   &nbsp;·&nbsp;
   <a href="docs/MODEL_CARD.md">Model Card</a>
   &nbsp;·&nbsp;
+  <a href="examples/matsynth-90/README.md">MatSynth-90</a>
+  &nbsp;·&nbsp;
   <a href="LICENSE">Apache-2.0</a>
 </p>
 
@@ -42,6 +44,12 @@ SKPBR 是我拿来验证一件事的小模型：给它一张尽量平整的材�
 2. **纯文字 + Seed**：生成可复现的材质候选。能运行，但仍然是实验功能。
 
 先把边界说清楚：SKPBR 还不是“随手拍一张照片就得到生产级材质”的扫描器。图片最好已经对齐、接近平面、曝光和光照比较克制；高密度纹理、复杂砖缝、细裂纹与纯文字结构仍然会失败。
+
+### 90 材质能力验证
+
+我们从 MatSynth 中按元数据筛选了 90 个 CC0 材质，先导入 Blender 渲染统一的平面预览，再只把预览图和“类别 + 主色”短 Prompt 交给 SKPBR。模型没有读取或复制原始 PBR 贴图；90/90 项均生成成功，共输出 540 张 512px 贴图。
+
+在 RTX 3060、CUDA、batch 4 下，模型加载完成后的整批处理耗时 **45.934 秒**，平均 **0.510 秒/材质**；计时包含图片读取、推理和结果写盘。完整输入、九张六贴图明细、逐项来源与限制说明见 **[MatSynth 90 材质能力验证 →](examples/matsynth-90/README.md)**。
 
 ### v0.5 改了什么
 
@@ -159,11 +167,11 @@ skpbr \
 
 ### 仓库里有什么
 
-仓库只放推理代码、冻结的 v0.5 权重、测试、一个明亮棚拍展示，以及几张精简的历史评估图。训练图、目标贴图、商业材质库、缓存、优化器状态、样本身份和内部报告不随仓库发布。
+仓库只放推理代码、冻结的 v0.5 权重、测试、一个明亮棚拍展示、精简的历史评估图，以及 MatSynth-90 的 CC0 Blender 输入预览与生成结果。训练图、目标贴图、MatSynth 原始 PBR 贴图、商业材质库、缓存、优化器状态和内部报告不随仓库发布。
 
 ### 许可证
 
-仓库自行创作的代码和导出的 SKPBR 权重使用 [Apache License 2.0](LICENSE)。Apache-2.0 不会自动授予第三方源素材的再分发权；这类素材没有放进仓库。
+仓库自行创作的代码和导出的 SKPBR 权重使用 [Apache License 2.0](LICENSE)。`examples/matsynth-90` 中的源预览部分来自逐项标记为 CC0 的 MatSynth 子集；来源与许可见[第三方说明](docs/THIRD_PARTY.md)和[逐项清单](examples/matsynth-90/materials.csv)。
 
 ## English
 
@@ -177,6 +185,12 @@ It has two input paths:
 2. **Text + seed** generates a repeatable material candidate. It runs, but it remains experimental.
 
 The boundary matters: SKPBR is not yet a “casual phone photo in, production material out” scanner. The image should be aligned, close to planar, and reasonably controlled in exposure and lighting. Dense veins, cracks, brick layouts, and text-only spatial structure can still fail.
+
+### 90-material capability check
+
+We selected 90 MatSynth materials whose metadata reports CC0, imported them into Blender to render consistent planar previews, and gave SKPBR only each preview plus a short category-and-color Prompt. The model did not read or copy the original PBR maps. All 90 items completed, producing 540 maps at 512px.
+
+On an RTX 3060 with CUDA and batch 4, the warm-model batch took **45.934 seconds**, or **0.510 seconds/material**, including image reads, inference, and output writes. See the **[MatSynth 90-material capability check →](examples/matsynth-90/README.md)** for the inputs, nine detailed six-map sheets, per-item provenance, and limitations.
 
 ### What changed in v0.5
 
@@ -294,8 +308,8 @@ Not established:
 
 ### What is published
 
-The repository contains inference code, the frozen v0.5 checkpoint, tests, one bright studio gallery, and a few compact historical evaluation images. Training images, target maps, commercial material libraries, caches, optimizer states, sample identities, and internal reports are not distributed.
+The repository contains inference code, the frozen v0.5 checkpoint, tests, one bright studio gallery, compact historical evaluation images, and the CC0 Blender input previews plus generated results for MatSynth-90. Training images, target maps, original MatSynth PBR maps, commercial material libraries, caches, optimizer states, and internal reports are not distributed.
 
 ### License
 
-Repository-authored code and the exported SKPBR checkpoint use the [Apache License 2.0](LICENSE). Apache-2.0 does not grant redistribution rights for third-party source assets; none are included here.
+Repository-authored code and the exported SKPBR checkpoint use the [Apache License 2.0](LICENSE). Source-preview portions under `examples/matsynth-90` derive from a MatSynth subset whose per-item metadata reports CC0; see the [third-party notice](docs/THIRD_PARTY.md) and [item manifest](examples/matsynth-90/materials.csv).

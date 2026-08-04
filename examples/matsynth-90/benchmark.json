@@ -1,0 +1,50 @@
+{
+  "schema": "skpbr-matsynth-90-capability-check-v1",
+  "created_utc": "2026-08-04T08:16:16.647673+00:00",
+  "status": "complete",
+  "model": {
+    "version": "SKPBR v0.5 / D57",
+    "architecture": "AlbedoDisentangledMultimodalPBRNet",
+    "parameter_count": 4586975,
+    "checkpoint": "skpbr_v0_5_fixed_data_optimized.pt",
+    "checkpoint_sha256": "fe434c5742772d621d7dc91f4c3e97abecf8036d268ff537972463fcf1eebb72"
+  },
+  "source": {
+    "dataset": "MatSynth",
+    "dataset_url": "https://huggingface.co/datasets/gvecchio/MatSynth",
+    "dataset_revision": "5d5c84bbaf19fbdf64c617073a719e97082f6202",
+    "selection": "90 materials; 9 each from 10 categories; metadata license filtered to CC0",
+    "input_pipeline": "source PBR material -> Blender planar preview render -> RGB crop",
+    "inference_prompt": "category plus automatically estimated dominant color"
+  },
+  "inference": {
+    "mode": "image_plus_text",
+    "device": "cuda",
+    "gpu": "NVIDIA GeForce RTX 3060",
+    "resolution": 512,
+    "batch_size": 4,
+    "materials": 90,
+    "maps_per_material": 6,
+    "map_count": 540,
+    "preview_count": 90,
+    "elapsed_seconds": 45.93412540003192,
+    "seconds_per_material": 0.5103791711114657,
+    "timing_scope": "after model load; includes input decode, inference, and output writes",
+    "torch_peak_allocated_gib": 2.3395161628723145,
+    "torch_peak_reserved_gib": 3.625,
+    "observed_peak_whole_device_gib": 4.6663818359375
+  },
+  "verification": {
+    "status": "passed",
+    "missing_outputs": 0,
+    "unexpected_image_sizes": 0,
+    "target_maps_available_to_inference": false,
+    "source_map_lookup_or_copy": false,
+    "ground_truth_metrics_computed": false
+  },
+  "known_limitations": [
+    "Rendered highlights and shading can leak into BaseColor or geometry maps.",
+    "The v0.5 Prompt taxonomy has no dedicated Wood class; Wood was mapped to Cork.",
+    "This run demonstrates coverage and completion, not ground-truth physical accuracy."
+  ]
+}
