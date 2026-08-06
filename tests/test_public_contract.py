@@ -45,16 +45,16 @@ class PublicContractTest(unittest.TestCase):
 
     def test_checkpoint_contract(self) -> None:
         state = self.payload["model"]
-        self.assertEqual(__version__, "0.5.0")
+        self.assertEqual(__version__, "0.6.0")
         self.assertEqual(
-            self.payload["schema"], "skpbr-v0.5-fixed-data-optimized-checkpoint-v1"
+            self.payload["schema"], "skpbr-v0.6-d72-intrinsic-ao-checkpoint-v1"
         )
-        self.assertEqual(len(state), 406)
-        self.assertEqual(sum(tensor.numel() for tensor in state.values()), 4_586_980)
-        self.assertEqual(self.payload["parameter_count"], 4_586_975)
+        self.assertEqual(len(state), 969)
+        self.assertEqual(sum(tensor.numel() for tensor in state.values()), 5_652_256)
+        self.assertEqual(self.payload["parameter_count"], 5_652_218)
         self.assertTrue(all(isinstance(key, str) for key in state))
         self.assertTrue(all(torch.is_tensor(value) for value in state.values()))
-        self.assertEqual(parameter_count(self.model), 4_586_975)
+        self.assertEqual(parameter_count(self.model), 5_652_218)
 
     @torch.inference_mode()
     def test_image_and_text_only_forward(self) -> None:
@@ -134,9 +134,10 @@ class PublicContractTest(unittest.TestCase):
                 self.assertTrue((output / "maps" / f"{name}.png").is_file())
             saved = json.loads((output / "inference_manifest.json").read_text(encoding="utf-8"))
             self.assertEqual(
-                saved["schema"], "skpbr-v0.5-fixed-data-optimized-inference"
+                saved["schema"], "skpbr-v0.6-d72-intrinsic-ao-inference"
             )
-            self.assertEqual(saved["model"]["total_parameters"], 4_586_975)
+            self.assertEqual(saved["model"]["total_parameters"], 5_652_218)
+            self.assertEqual(saved["model"]["safety_parameters"], 15_330)
 
 
 if __name__ == "__main__":

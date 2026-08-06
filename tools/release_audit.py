@@ -16,7 +16,7 @@ from PIL import Image
 
 
 ROOT = Path(__file__).resolve().parents[1]
-CHECKPOINT = ROOT / "src" / "skpbr" / "weights" / "skpbr_v0_5_fixed_data_optimized.pt"
+CHECKPOINT = ROOT / "src" / "skpbr" / "weights" / "skpbr_v0_6_d72_intrinsic_ao.pt"
 TEXT_SUFFIXES = {
     ".cff",
     ".gitignore",
@@ -68,6 +68,10 @@ PUBLIC_IMAGE_DIMENSIONS = {
     "examples/matsynth-90/images/details/details_0071_0080.jpg": (1335, 1748),
     "examples/matsynth-90/images/details/details_0081_0090.jpg": (1335, 1748),
     "examples/matsynth-90/images/details/details_0091_0100.jpg": (1335, 1748),
+    "examples/matsynth-blind6/questions_2x3.png": (1920, 1420),
+    "examples/matsynth-blind6/results_01_02.png": (2048, 1120),
+    "examples/matsynth-blind6/results_03_04.png": (2048, 1120),
+    "examples/matsynth-blind6/results_05_06.png": (2048, 1120),
 }
 ALLOWED_PUBLIC_IMAGES = set(PUBLIC_IMAGE_DIMENSIONS)
 
@@ -135,7 +139,7 @@ def audit() -> tuple[dict[str, object], dict[str, object]]:
     state = payload.get("model") if isinstance(payload, dict) else None
     checkpoint_tensor_only = (
         isinstance(state, dict)
-        and len(state) == 406
+        and len(state) == 969
         and all(isinstance(key, str) for key in state)
         and all(torch.is_tensor(value) for value in state.values())
     )
@@ -154,12 +158,12 @@ def audit() -> tuple[dict[str, object], dict[str, object]]:
         and not missing_public_example_files
         and not invalid_example_dimensions
         and checkpoint_tensor_only
-        and state_tensor_elements == 4_586_980
-        and parameter_count == 4_586_975
+        and state_tensor_elements == 5_652_256
+        and parameter_count == 5_652_218
         and not checkpoint_private_hits
     )
     manifest = {
-        "schema": "skpbr-public-release-manifest-v5",
+        "schema": "skpbr-public-release-manifest-v6",
         "generated_utc": datetime.now(timezone.utc).isoformat(),
         "files": [
             {
@@ -171,7 +175,7 @@ def audit() -> tuple[dict[str, object], dict[str, object]]:
         ],
     }
     report = {
-        "schema": "skpbr-public-release-audit-v5",
+        "schema": "skpbr-public-release-audit-v6",
         "generated_utc": datetime.now(timezone.utc).isoformat(),
         "status": "passed" if passed else "failed",
         "checks": {

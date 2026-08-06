@@ -17,19 +17,19 @@ from .io import (
     save_preview,
     sha256,
 )
-from .albedo import AlbedoDisentangledMultimodalPBRNet, parameter_manifest
 from .model import isotropic_multiscale_seed_field
 from .prompt import parse_prompt
+from .safety import SKPBRD72Net, model_manifest
 
 
-DEFAULT_CHECKPOINT_SHA256 = "fe434c5742772d621d7dc91f4c3e97abecf8036d268ff537972463fcf1eebb72"
+DEFAULT_CHECKPOINT_SHA256 = "8740fc1576858eb046d5fe08316a954c7361070d3503664d657a88b9d92874ec"
 
 
 def default_checkpoint() -> str:
     return str(
         Path(__file__).resolve().parent
         / "weights"
-        / "skpbr_v0_5_fixed_data_optimized.pt"
+        / "skpbr_v0_6_d72_intrinsic_ao.pt"
     )
 
 
@@ -43,16 +43,19 @@ def resolve_device(requested: str) -> torch.device:
 
 def load_model(
     checkpoint: Path, device: torch.device
-) -> tuple[AlbedoDisentangledMultimodalPBRNet, dict[str, object]]:
+) -> tuple[SKPBRD72Net, dict[str, object]]:
     if not checkpoint.is_file():
         raise FileNotFoundError(checkpoint)
     digest = sha256(checkpoint)
-    if checkpoint.resolve() == Path(default_checkpoint()).resolve() and digest != DEFAULT_CHECKPOINT_SHA256:
+    if (
+        checkpoint.resolve() == Path(default_checkpoint()).resolve()
+        and digest != DEFAULT_CHECKPOINT_SHA256
+    ):
         raise RuntimeError("Bundled checkpoint SHA-256 mismatch")
     payload = torch.load(checkpoint, map_location="cpu", weights_only=True)
     if not isinstance(payload, dict) or not isinstance(payload.get("model"), dict):
-        raise RuntimeError("Expected a tensor-only SKPBR v0.5 checkpoint payload")
-    model = AlbedoDisentangledMultimodalPBRNet()
+        raise RuntimeError("Expected a restricted-load SKPBR v0.6 checkpoint payload")
+    model = SKPBRD72Net()
     model.load_state_dict(payload["model"], strict=True)
     model.requires_grad_(False)
     return model.to(device).eval(), payload
@@ -99,7 +102,7 @@ def run(options: argparse.Namespace) -> dict[str, object]:
     save_map_set(output / "maps", maps)
     save_preview(output / "preview.png", render_plane(maps.unsqueeze(0), variant=0)[0])
     metadata: dict[str, object] = {
-        "schema": "skpbr-v0.5-fixed-data-optimized-inference",
+        "schema": "skpbr-v0.6-d72-intrinsic-ao-inference",
         "created_utc": datetime.now(timezone.utc).isoformat(),
         "mode": mode,
         "mode_semantics": (
@@ -119,13 +122,13 @@ def run(options: argparse.Namespace) -> dict[str, object]:
         "seed": int(options.seed) if image_path is None else None,
         "resolution": [resolution, resolution],
         "maps": ["BaseColor", "Roughness", "Metallic", "Normal OpenGL +Y", "Height", "AO"],
-        "model": parameter_manifest(model),
+        "model": model_manifest(model),
         "checkpoint_sha256": sha256(checkpoint),
         "checkpoint_epoch": payload.get("selected_epoch", payload.get("epoch")),
         "target_or_library_asset_reads": 0,
         "known_status": {
-            "image_prompt_mode": "research preview; Blind-H6 failed both BaseColor gates and passed 2/6 material identities",
-            "prompt_only_mode": "experimental; Blind-H6 failed autocorrelation and stripe-structure gates",
+            "image_prompt_mode": "research preview; D72 improves intrinsic/AO safety but the post-freeze MatSynth-6 test still exposes foil and paving-stone failures",
+            "prompt_only_mode": "experimental deterministic D57 branch; spatial structure remains unreliable",
             "resolution": "512 px is the evaluated release resolution",
         },
     }
@@ -150,7 +153,10 @@ def arguments() -> argparse.Namespace:
 def main() -> None:
     metadata = run(arguments())
     if metadata["mode"] == "prompt_seed_generation":
-        print("WARNING: text-only generation is experimental; Blind-H6 did not meet its structure or material-identity thresholds.")
+        print(
+            "WARNING: text-only generation is experimental; the frozen D57 branch "
+            "does not reliably reconstruct spatial structure."
+        )
     print(json.dumps(metadata, ensure_ascii=False, indent=2))
 
 

@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.6.0 - 2026-08-06
+
+- Released the 5,652,218-parameter D72 checkpoint with explicit intrinsic BaseColor decomposition and shared multiscale physical-property recovery.
+- Added illumination, specular, color-edge, geometry-edge, and gated high-resolution detail paths so raw RGB shading is no longer passed unconditionally into BaseColor.
+- Changed AO to a Height/Normal-derived prediction with bounded correction, then added a 15,330-parameter global safety calibration for BaseColor and AO. Roughness, Metallic, Normal, and Height remain bitwise unchanged by the D72 safety gate.
+- Kept the deterministic D57 Prompt + seed branch for text-only generation; v0.6 improvements primarily affect image + Prompt reconstruction.
+- Published a six-category, post-freeze MatSynth diagnostic. It exposes strong failures on foil and structured paving rather than presenting the release as production-ready.
+- Replaced the v0.5 public checkpoint, updated bilingual documentation and contract tests, and retained only compact public evaluation boards.
+
 ## 0.5.0 - 2026-08-04
 
 - Replaced the v0.4 checkpoint with the frozen D57 fixed-data checkpoint while keeping the 4,586,975-parameter architecture unchanged.

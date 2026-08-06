@@ -1,0 +1,108 @@
+{
+  "schema": "skpbr-v0.6-matsynth-blind6-v1",
+  "checkpoint": {
+    "release": "v0.6.0",
+    "stage": "D72",
+    "architecture": "D72IntrinsicAOSafetyNet",
+    "parameters": 5652218,
+    "public_sha256": "8740fc1576858eb046d5fe08316a954c7361070d3503664d657a88b9d92874ec"
+  },
+  "protocol": {
+    "selection": "six distinct categories locked from metadata before pixel access",
+    "model_input": "one 512px Blender RGB render plus one English prompt",
+    "target_use": "scoring only",
+    "used_for_training_or_checkpoint_selection": false,
+    "future_status": "diagnostic only; excluded from future tuning and checkpoint selection"
+  },
+  "materials": [
+    {
+      "index": 1,
+      "id": "acg_asphalt_017",
+      "name_zh": "沥青路面 017",
+      "name_en": "Asphalt 017",
+      "category": "Concrete",
+      "prompt": "Asphalt 017, dry asphalt or concrete surface, non-metallic finish and irregular aggregate relief",
+      "license": "CC0",
+      "source": "ambientCG",
+      "source_url": "https://www.ambientcg.com/view?id=Asphalt017",
+      "metrics": {"basecolor_linear_mae": 0.120040, "roughness_mae": 0.322523, "metallic_mae": 0.005969, "normal_angle_degrees": 11.339434, "height_gradient_mae": 0.011948, "ao_mae": 0.097570, "rerender_linear_mae": 0.103233}
+    },
+    {
+      "index": 2,
+      "id": "ms_leather_008",
+      "name_zh": "皮革 008",
+      "name_en": "Leather 008",
+      "category": "Leather",
+      "prompt": "Leather 008, leather surface with visible grain, non-metallic finish and fine flexible relief",
+      "license": "CC0",
+      "source": "MatSynth",
+      "source_url": "https://huggingface.co/datasets/gvecchio/MatSynth",
+      "metrics": {"basecolor_linear_mae": 0.104604, "roughness_mae": 0.079131, "metallic_mae": 0.005622, "normal_angle_degrees": 12.521200, "height_gradient_mae": 0.009777, "ao_mae": 0.071380, "rerender_linear_mae": 0.094097}
+    },
+    {
+      "index": 3,
+      "id": "cgbc_granite_004_large",
+      "name_zh": "花岗岩 04（大尺度）",
+      "name_en": "Granite 04 Large",
+      "category": "Marble",
+      "prompt": "Granite 04 Large, polished mineral marble surface, non-metallic finish and restrained natural relief",
+      "license": "CC0",
+      "source": "CGBookcase",
+      "source_url": "https://www.cgbookcase.com/textures/granite-04-large",
+      "metrics": {"basecolor_linear_mae": 0.168711, "roughness_mae": 0.058372, "metallic_mae": 0.005968, "normal_angle_degrees": 3.353593, "height_gradient_mae": 0.006350, "ao_mae": 0.089976, "rerender_linear_mae": 0.157887}
+    },
+    {
+      "index": 4,
+      "id": "acg_foil_002",
+      "name_zh": "金属箔 002",
+      "name_en": "Foil 002",
+      "category": "Metal",
+      "prompt": "Foil 002, metallic surface with physically varied roughness and visible manufactured relief",
+      "license": "CC0",
+      "source": "ambientCG",
+      "source_url": "https://www.ambientcg.com/view?id=Foil002",
+      "metrics": {"basecolor_linear_mae": 0.531006, "roughness_mae": 0.356907, "metallic_mae": 0.015397, "normal_angle_degrees": 20.323664, "height_gradient_mae": 0.055209, "ao_mae": 0.394480, "rerender_linear_mae": 0.239899}
+    },
+    {
+      "index": 5,
+      "id": "ms_paving_stones_009__grass_004",
+      "name_zh": "草缝铺路石",
+      "name_en": "Paving Stones 009 X Grass 004",
+      "category": "Stone",
+      "prompt": "Paving Stones 009 X Grass 004, rough mineral stone surface, non-metallic finish and irregular geometric relief",
+      "license": "CC0",
+      "source": "MatSynth",
+      "source_url": "https://huggingface.co/datasets/gvecchio/MatSynth",
+      "metrics": {"basecolor_linear_mae": 0.112441, "roughness_mae": 0.438926, "metallic_mae": 0.007256, "normal_angle_degrees": 25.584764, "height_gradient_mae": 0.020760, "ao_mae": 0.165908, "rerender_linear_mae": 0.112390}
+    },
+    {
+      "index": 6,
+      "id": "acg_painted_wood_009_c",
+      "name_zh": "涂漆木材 009 C",
+      "name_en": "Painted Wood 009 C",
+      "category": "Wood",
+      "prompt": "Painted Wood 009 C, natural wood surface with directional grain, non-metallic finish and shallow fibrous relief",
+      "license": "CC0",
+      "source": "ambientCG",
+      "source_url": "https://www.ambientcg.com/view?id=PaintedWood009C",
+      "metrics": {"basecolor_linear_mae": 0.110141, "roughness_mae": 0.183325, "metallic_mae": 0.005664, "normal_angle_degrees": 3.829807, "height_gradient_mae": 0.005169, "ao_mae": 0.091447, "rerender_linear_mae": 0.090076}
+    }
+  ],
+  "macro_metrics": {
+    "basecolor_linear_mae": 0.191157,
+    "roughness_mae": 0.239864,
+    "roughness_gradient_mae": 0.069260,
+    "metallic_mae": 0.007646,
+    "normal_angle_degrees": 12.825410,
+    "normal_gradient_mae": 0.280886,
+    "height_gradient_mae": 0.018202,
+    "ao_mae": 0.151794,
+    "rerender_linear_mae": 0.132930
+  },
+  "boards": {
+    "questions_2x3.png": "2341dee5d949e916ebe93ab541324b697326dfcfd7fbc68564521d4fe721b784",
+    "results_01_02.png": "fa237d77aecc28c812d3418b8bfca31f862e84fec47a5ed72562e0c9afdf32ab",
+    "results_03_04.png": "6727f752d405841211dbe629b6affb624826ebbbdcd0ce64fac12c75c6a3981b",
+    "results_05_06.png": "0707fe4177dea6d27917c641102a97df230d39f6d27010dabc50aef2e583746a"
+  }
+}

@@ -11,6 +11,8 @@
   &nbsp;·&nbsp;
   <a href="examples/matsynth-90/README.md">MatSynth-90</a>
   &nbsp;·&nbsp;
+  <a href="examples/matsynth-blind6/README.md">Blind-6</a>
+  &nbsp;·&nbsp;
   <a href="LICENSE">Apache-2.0</a>
 </p>
 
@@ -19,7 +21,7 @@
   &nbsp;&nbsp;
   <code>TEXT + SEED · EXPERIMENTAL</code>
   &nbsp;&nbsp;
-  <code>4,586,975 PARAMS</code>
+  <code>5,652,218 PARAMS</code>
   &nbsp;&nbsp;
   <code>512 PX · 6 MAPS</code>
 </p>
@@ -29,14 +31,14 @@
     <img src="docs/assets/skpbr_v05_bright_studio_2x3.png" width="100%" alt="Six SKPBR Image + Text materials in one bright Blender Cycles studio">
   </a>
   <br>
-  <sub>同一套 Cycles 灯光下的六组 Image + Text 输出。石砖、烤蓝钢和紫色皮革来自 D57；铜锈、车漆和混凝土保留自 v0.4，用来做统一棚拍对照。此图是视觉展示，不是验收分数。</sub>
+  <sub>同一套 Cycles 灯光下的六组 Image + Text 输出，用来直观看材质类别与贴图响应。这里是跨版本视觉展示；当前 D72 的冻结后盲测在下方单独列出。</sub>
 </div>
 
 ## 简体中文
 
 SKPBR 是我拿来验证一件事的小模型：给它一张尽量平整的材质参考图，再补一句文字描述，能不能直接得到一套可以放进 Blender 或游戏引擎的 PBR 贴图。
 
-当前 **v0.5 / D57** 有 **4,586,975 个参数**，输出六张 512px 贴图：BaseColor、Roughness、Metallic、OpenGL +Y Normal、Height 和 AO。
+当前 **v0.6 / D72** 有 **5,652,218 个参数**，输出六张 512px 贴图：BaseColor、Roughness、Metallic、OpenGL +Y Normal、Height 和 AO。
 
 它现在有两条输入路径：
 
@@ -45,49 +47,40 @@ SKPBR 是我拿来验证一件事的小模型：给它一张尽量平整的材�
 
 先把边界说清楚：SKPBR 还不是“随手拍一张照片就得到生产级材质”的扫描器。图片最好已经对齐、接近平面、曝光和光照比较克制；高密度纹理、复杂砖缝、细裂纹与纯文字结构仍然会失败。
 
-### 90 材质能力验证
+### 90 材质能力验证（v0.5 历史记录）
 
 我们从 MatSynth 中按元数据筛选了 90 个 CC0 材质，先导入 Blender 渲染统一的平面预览，再只把预览图和“类别 + 主色”短 Prompt 交给 SKPBR。模型没有读取或复制原始 PBR 贴图；90/90 项均生成成功，共输出 540 张 512px 贴图。
 
 在 RTX 3060、CUDA、batch 4 下，模型加载完成后的整批处理耗时 **45.934 秒**，平均 **0.510 秒/材质**；计时包含图片读取、推理和结果写盘。完整输入、九张六贴图明细、逐项来源与限制说明见 **[MatSynth 90 材质能力验证 →](examples/matsynth-90/README.md)**。
 
-### v0.5 改了什么
+### v0.6 改了什么
 
-D55–D57 没有增加材质库，也没有增加监督目标文件，继续使用固定的 604 个训练样本和 67 个验证样本：
+这一版没有继续往旧模型上堆空间纹理 Adapter，而是把图片模式改成更明确的物理解耦路径：
 
-| 阶段 | 做了什么 | 结果 |
-|---|---|---|
-| D55 | 专门修正反射率颜色和光照扰动 | 开发集 BaseColor MAE 0.05878 → 0.05622 |
-| D56 | 尝试父模型锚定的几何修复 | 连续训练没有改善，最终保留 epoch 0；没有硬选更差权重 |
-| D57 | 联合调整对齐的高频纹理、BaseColor 与几何适配器 | BaseColor MAE 0.05577，重渲染 MAE 0.04077 |
+| 阶段 | 做了什么 |
+|---|---|
+| D69 | 先预测无光照 BaseColor、光照、高光 Mask、颜色边缘和几何边缘；高分辨率 RGB 细节经过门控后才能进入 BaseColor |
+| D70–D71 | 用共享的多尺度物理分支恢复 Roughness、Metallic、Normal 和 Height；AO 主要由 Height/Normal 派生，再做小幅修正 |
+| D72 | 加入仅 15,330 参数的全局安全门，在去光照 BaseColor 与 D57 锚点、派生 AO 与旧 AO 之间做置信度融合；Roughness、Metallic、Normal、Height 不被这个安全门改写 |
 
-相对 v0.4，开发集颜色和重渲染更好，Normal 也小幅改善；但颜色到几何泄漏从 0.06158 轻微回退到 0.06198。它不是全面胜出，所以这里不写成“问题已解决”。
+D72 在冻结的 128 项双域验证集上得到：BaseColor 线性 MAE **0.06524**、Roughness MAE **0.06778**、Metallic MAE **0.03992**、Normal 角度误差 **10.11°**、AO MAE **0.16637**、重渲染线性 MAE **0.06006**。这些数字只描述该验证集，不代表任意图片都能达到相同质量。
 
-### 冻结后的 Blind-H6
+纯文字路径暂时沿用 D57 的确定性 Prompt + Seed 分支，所以 v0.6 的主要进步集中在图片 + 文字重建。
 
-H6 的六种目标材质是在 D57 权重冻结之后才生成的，推理只拿到一张 RGB 图和 Prompt，或只拿到 Prompt 与 Seed。模型没有读取目标贴图，也没有复制源材质。
+### 冻结后的 MatSynth Blind-6
 
-| 检查项 | 结果 | 状态 |
-|---|---:|---|
-| 通过全部身份检查的材质 | 2 / 6 | 未通过；要求至少 4 种 |
-| 已通过的汇总阈值 | 14 / 19 | 总体未通过 |
-| 图片 BaseColor MAE | 0.09446 | 未通过；阈值 ≤ 0.090 |
-| 图片 BaseColor 均值 MAE | 0.08440 | 未通过；阈值 ≤ 0.075 |
-| 图片 Roughness MAE | 0.08537 | 通过 |
-| 图片 Metallic MAE | 0.03544 | 通过 |
-| 图片 Normal 角度误差 | 12.09° | 通过 |
-| 图片重渲染 MAE | 0.04699 | 通过 |
-| 颜色到几何泄漏 | 0.07451 | 通过，但接近 0.075 阈值 |
-| 纯文字自相关 MAE | 0.24178 | 未通过；阈值 ≤ 0.200 |
-| 纯文字条纹峰值 MAE | 0.28471 | 未通过；阈值 ≤ 0.240 |
-| 金属/非金属灾难性互换 | 0 | 通过 |
+D72 冻结后，我们先按元数据锁定六个不同类别的 MatSynth 材质，再统一渲染。模型只获得一张 512px RGB 图和 Prompt，目标六贴图只用于评分，也没有参与选权重。
 
-结论很直接：图片模式已经能稳定给出六张可编辑贴图，材质的物理类别和重渲染通常比颜色更可靠；BaseColor 泛化和纯文字空间结构仍是下一步最该修的两件事。完整口径写在[模型卡](docs/MODEL_CARD.md)里。
+[![SKPBR v0.6 MatSynth Blind-6 题目](examples/matsynth-blind6/questions_2x3.png)](examples/matsynth-blind6/README.md)
+
+结果很有区分度：花岗岩、涂漆木材的几何比较稳，金属/非金属判断也稳定；金属箔在 BaseColor、Roughness、AO 上明显失败，草缝铺路石的结构和 Roughness 也没有还原好。六题宏平均为 BaseColor 线性 MAE **0.1912**、Roughness MAE **0.2399**、Normal 角度误差 **12.83°**、重渲染线性 MAE **0.1329**。完整题目、输出和逐项分数见 **[MatSynth Blind-6 →](examples/matsynth-blind6/README.md)**。
+
+这六题已经用于诊断，下一轮不会拿它们训练或选模型。
 
 <details>
 <summary><strong>展开查看 v0.4 Blind-G 历史对照图</strong></summary>
 
-这三张图是 v0.4 权重冻结后的旧盲测记录，保留用于观察版本变化，不代表 v0.5 的 H6 分数。
+这三张图是 v0.4 权重冻结后的旧盲测记录，只保留用于观察版本变化。
 
 [![SKPBR v0.4 Blind-G 较好结果 01–02](examples/blind-g/blind_g_best_01_02.png)](examples/blind-g/blind_g_best_01_02.png)
 
@@ -108,7 +101,7 @@ python -m pip install -e .
 
 ### 本地部署要求
 
-下面说的是**推理**，不是训练。模型权重本身约 18.5MB，实际安装空间主要由 PyTorch 和 CUDA 运行库占用。
+下面说的是**推理**，不是训练。模型权重本身约 22.9MB，实际安装空间主要由 PyTorch 和 CUDA 运行库占用。
 
 | 项目 | 实用建议 |
 |---|---|
@@ -118,7 +111,7 @@ python -m pip install -e .
 | GPU | 可选；推荐 NVIDIA CUDA 显卡，512px 推理建议至少有 2GB 可用显存，4GB 以上更稳妥 |
 | 硬盘 | CPU 环境建议预留约 2GB；CUDA 环境建议预留约 5GB，具体取决于 PyTorch 版本 |
 
-本机 RTX 3060 的 512px 发布烟测中，图片 + 文字模式峰值 allocated / reserved 显存约为 **0.604 / 0.926 GiB**，纯文字模式约为 **0.600 / 0.928 GiB**。单套六贴图生成是十秒级，但会随显卡、驱动、PyTorch 版本、模型加载和文件写入速度变化。这是一次单请求测量，不是所有机器的硬性保证。
+本机 RTX 3060 的 D72 盲测中，第一次冷启动约 **9.09 秒**，模型加载后的单材质推理约 **0.60 秒**，峰值 reserved 显存约 **1.094 GiB**。纯文字分支更小，但仍会受显卡、驱动、PyTorch 版本和文件写入速度影响；这些是本机记录，不是所有机器的硬性保证。
 
 - `--device auto` 检测到 CUDA 时使用显卡，否则回退到 CPU；CPU 可以运行，但会更慢。
 - 推理本身不需要 Blender；Blender 只用于把输出贴图渲染成材质预览。
@@ -167,17 +160,17 @@ skpbr \
 
 ### 仓库里有什么
 
-仓库只放推理代码、冻结的 v0.5 权重、测试、一个明亮棚拍展示、精简的历史评估图，以及 MatSynth-90 的 CC0 Blender 输入预览与生成结果。训练图、目标贴图、MatSynth 原始 PBR 贴图、商业材质库、缓存、优化器状态和内部报告不随仓库发布。
+仓库只放推理代码、冻结的 v0.6 权重、测试、一个明亮棚拍展示、精简的历史评估图，以及 MatSynth-90 与冻结后 Blind-6 的公开展示。训练图、目标贴图、MatSynth 原始 PBR 贴图、商业材质库、缓存、优化器状态和内部报告不随仓库发布。
 
 ### 许可证
 
-仓库自行创作的代码和导出的 SKPBR 权重使用 [Apache License 2.0](LICENSE)。`examples/matsynth-90` 中的源预览部分来自逐项标记为 CC0 的 MatSynth 子集；来源与许可见[第三方说明](docs/THIRD_PARTY.md)和[逐项清单](examples/matsynth-90/materials.csv)。
+仓库自行创作的代码和导出的 SKPBR 权重使用 [Apache License 2.0](LICENSE)。公开 MatSynth 展示中的源预览来自逐项标记为 CC0 的子集；来源与许可见[第三方说明](docs/THIRD_PARTY.md)、[90 材质清单](examples/matsynth-90/materials.csv)和 [Blind-6 指标文件](examples/matsynth-blind6/benchmark.json)。
 
 ## English
 
 SKPBR is a small model built around one practical question: can a mostly flat material reference, plus a short description, become a usable set of PBR maps for Blender or a game engine?
 
-The current **v0.5 / D57** checkpoint has **4,586,975 parameters** and writes six 512px maps: BaseColor, Roughness, Metallic, OpenGL +Y Normal, Height, and AO.
+The current **v0.6 / D72** checkpoint has **5,652,218 parameters** and writes six 512px maps: BaseColor, Roughness, Metallic, OpenGL +Y Normal, Height, and AO.
 
 It has two input paths:
 
@@ -186,49 +179,40 @@ It has two input paths:
 
 The boundary matters: SKPBR is not yet a “casual phone photo in, production material out” scanner. The image should be aligned, close to planar, and reasonably controlled in exposure and lighting. Dense veins, cracks, brick layouts, and text-only spatial structure can still fail.
 
-### 90-material capability check
+### 90-material capability check (historical v0.5 run)
 
 We selected 90 MatSynth materials whose metadata reports CC0, imported them into Blender to render consistent planar previews, and gave SKPBR only each preview plus a short category-and-color Prompt. The model did not read or copy the original PBR maps. All 90 items completed, producing 540 maps at 512px.
 
 On an RTX 3060 with CUDA and batch 4, the warm-model batch took **45.934 seconds**, or **0.510 seconds/material**, including image reads, inference, and output writes. See the **[MatSynth 90-material capability check →](examples/matsynth-90/README.md)** for the inputs, nine detailed six-map sheets, per-item provenance, and limitations.
 
-### What changed in v0.5
+### What changed in v0.6
 
-D55–D57 added no material libraries or supervised target files. Training stayed on the fixed 604-row train and 67-row validation sets.
+The image path now separates observable appearance before predicting the PBR maps instead of stacking another spatial texture adapter on the old model.
 
-| Stage | Change | Result |
-|---|---|---|
-| D55 | reflectance-color recovery under lighting perturbations | development BaseColor MAE 0.05878 → 0.05622 |
-| D56 | parent-anchored geometry remediation | trained epochs did not improve validation, so epoch 0 was retained |
-| D57 | joint aligned high-frequency, BaseColor, and geometry adapter tuning | BaseColor MAE 0.05577; rerender MAE 0.04077 |
+| Stage | Change |
+|---|---|
+| D69 | predicts de-lit BaseColor, illumination, specular, color-edge, and geometry-edge masks; high-resolution RGB details enter BaseColor through a learned gate |
+| D70–D71 | reconstructs Roughness, Metallic, Normal, and Height with a shared multiscale physical decoder; AO is primarily derived from Height and Normal with a bounded correction |
+| D72 | adds a 15,330-parameter global safety gate between the de-lit BaseColor and D57 anchor, and between derived AO and the previous AO; it leaves Roughness, Metallic, Normal, and Height unchanged |
 
-Against v0.4, development color and rerendering improved and Normal moved slightly forward. Color-to-geometry leakage, however, moved from 0.06158 to 0.06198. This is a better checkpoint in selected areas, not a claim that the problem is solved.
+On the frozen 128-row dual-domain validation set, D72 records 0.06524 linear BaseColor MAE, 0.06778 Roughness MAE, 0.03992 Metallic MAE, 10.11° Normal angular error, 0.16637 AO MAE, and 0.06006 linear rerender MAE. These figures describe that validation set, not arbitrary photographs.
 
-### Post-freeze Blind-H6
+The text-only path still uses the frozen deterministic D57 Prompt + seed branch, so v0.6 mainly advances image + text reconstruction.
 
-The six H6 targets were created only after D57 was frozen. Inference received one RGB image plus Prompt, or Prompt plus seed. It never received target maps or copied a source material.
+### Post-freeze MatSynth Blind-6
 
-| Check | Result | Status |
-|---|---:|---|
-| Materials passing every identity check | 2 / 6 | Not passed; at least 4 required |
-| Aggregate thresholds passed | 14 / 19 | Overall result not passed |
-| Image BaseColor MAE | 0.09446 | Not passed; threshold ≤ 0.090 |
-| Image BaseColor mean MAE | 0.08440 | Not passed; threshold ≤ 0.075 |
-| Image Roughness MAE | 0.08537 | Passed |
-| Image Metallic MAE | 0.03544 | Passed |
-| Image Normal angular error | 12.09° | Passed |
-| Image rerender MAE | 0.04699 | Passed |
-| Color-to-geometry leakage | 0.07451 | Passed, close to the 0.075 threshold |
-| Text autocorrelation MAE | 0.24178 | Not passed; threshold ≤ 0.200 |
-| Text stripe-peak MAE | 0.28471 | Not passed; threshold ≤ 0.240 |
-| Catastrophic metal/non-metal swaps | 0 | Passed |
+After D72 was frozen, six distinct material categories were locked from metadata and rendered under one Blender setup. Inference received one 512px RGB image and one prompt. Target maps were used only for scoring and never for checkpoint selection.
 
-In short: image mode reliably produces six editable maps, and physical regime plus rerendering are usually stronger than exact color. BaseColor generalization and text-only spatial structure remain the two clearest problems. See the [model card](docs/MODEL_CARD.md) for the full evaluation contract.
+[![SKPBR v0.6 MatSynth Blind-6 questions](examples/matsynth-blind6/questions_2x3.png)](examples/matsynth-blind6/README.md)
+
+Granite and painted wood retain geometry comparatively well and non-metal classification is stable. Foil fails badly in BaseColor, Roughness, and AO; paving stones with grass also lose structure and roughness. Macro results are 0.1912 linear BaseColor MAE, 0.2399 Roughness MAE, 12.83° Normal angular error, and 0.1329 linear rerender MAE. See **[MatSynth Blind-6 →](examples/matsynth-blind6/README.md)** for every output and score.
+
+These six cases are now diagnostic-only and will not be used for further training or model selection.
 
 <details>
 <summary><strong>Expand the historical v0.4 Blind-G boards</strong></summary>
 
-These are retained as version-history references. They are not the v0.5 H6 score.
+These are retained only as version-history references.
 
 [![SKPBR v0.4 Blind-G stronger results 01–02](examples/blind-g/blind_g_best_01_02.png)](examples/blind-g/blind_g_best_01_02.png)
 
@@ -249,7 +233,7 @@ python -m pip install -e .
 
 ### Local deployment requirements
 
-The figures below describe **inference**, not training. The checkpoint itself is about 18.5MB; PyTorch and the CUDA runtime account for most of the installed size.
+The figures below describe **inference**, not training. The checkpoint itself is about 22.9MB; PyTorch and the CUDA runtime account for most of the installed size.
 
 | Item | Practical guidance |
 |---|---|
@@ -259,7 +243,7 @@ The figures below describe **inference**, not training. The checkpoint itself is
 | GPU | Optional; NVIDIA CUDA is recommended, with at least 2GB of free VRAM for 512px inference and 4GB+ for comfortable headroom |
 | Disk | Reserve about 2GB for a CPU environment or 5GB for a CUDA environment, depending on the PyTorch build |
 
-In the 512px release smoke test on the local RTX 3060, image + text peaked at approximately **0.604 / 0.926 GiB allocated / reserved VRAM**. Text-only inference peaked at **0.600 / 0.928 GiB**. A complete six-map request is on the order of seconds to tens of seconds, depending on GPU, driver, PyTorch build, model loading, and file I/O. These are single-request measurements, not hard guarantees for every machine.
+In the local RTX 3060 D72 blind run, the first cold request took about **9.09 seconds**, warm single-material inference took about **0.60 seconds**, and peak reserved VRAM was about **1.094 GiB**. The text-only branch is smaller. GPU, driver, PyTorch build, and file I/O still affect these figures; they are measurements, not hard requirements.
 
 - `--device auto` uses CUDA when available and otherwise falls back to CPU. CPU works, but is slower.
 - Blender is not required for inference; it is only needed to render the output maps as a material preview.
@@ -308,8 +292,8 @@ Not established:
 
 ### What is published
 
-The repository contains inference code, the frozen v0.5 checkpoint, tests, one bright studio gallery, compact historical evaluation images, and the CC0 Blender input previews plus generated results for MatSynth-90. Training images, target maps, original MatSynth PBR maps, commercial material libraries, caches, optimizer states, and internal reports are not distributed.
+The repository contains inference code, the frozen v0.6 checkpoint, tests, one bright studio gallery, compact historical evaluation images, and public MatSynth-90 plus post-freeze Blind-6 displays. Training images, target maps, original MatSynth PBR maps, commercial material libraries, caches, optimizer states, and internal reports are not distributed.
 
 ### License
 
-Repository-authored code and the exported SKPBR checkpoint use the [Apache License 2.0](LICENSE). Source-preview portions under `examples/matsynth-90` derive from a MatSynth subset whose per-item metadata reports CC0; see the [third-party notice](docs/THIRD_PARTY.md) and [item manifest](examples/matsynth-90/materials.csv).
+Repository-authored code and the exported SKPBR checkpoint use the [Apache License 2.0](LICENSE). Source-preview portions in the public MatSynth displays derive from subsets whose per-item metadata reports CC0; see the [third-party notice](docs/THIRD_PARTY.md), [90-item manifest](examples/matsynth-90/materials.csv), and [Blind-6 benchmark file](examples/matsynth-blind6/benchmark.json).
